@@ -100,7 +100,10 @@ function comenzarPartida() {
  */
 function mostrarResultado(puntaje, esRecord) {
   buscar("#puntaje-final").textContent = puntaje;
-  buscar("#mensaje-record").classList.toggle("oculto", !esRecord || puntaje === 0);
+  const hayRecord = esRecord && puntaje > 0;
+  buscar("#mensaje-record").classList.toggle("oculto", !hayRecord);
+  // El confeti solo se lanza si hubo récord.
+  buscar("#pantalla-fin").classList.toggle("celebrando", hayRecord);
   mostrarPantalla("pantalla-fin");
 }
 
@@ -161,6 +164,8 @@ function mostrarResultado2P(p1, p2) {
   else titulo = "🤝 ¡Empate!";
   buscar("#titulo-ganador").textContent = titulo;
 
+  // Confeti cuando hay ganador (no en empate).
+  buscar("#pantalla-2p-fin").classList.toggle("celebrando", p1 !== p2);
   if (p1 !== p2) Sonidos.record();
   mostrarPantalla("pantalla-2p-fin");
 }

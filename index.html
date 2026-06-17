@@ -40,7 +40,7 @@
       </section>
 
       <!-- ============ PANTALLA 2: SELECCIÓN DE AVATAR ============ -->
-      <section id="pantalla-seleccion" class="pantalla">
+      <section id="pantalla-seleccion" class="pantalla pantalla--estadio">
         <h2 class="titulo-seccion">Elige tu crack</h2>
         <p class="subtitulo">
           Cada jugador tiene una estadística de <strong>control</strong>
@@ -81,7 +81,7 @@
       </section>
 
       <!-- ============ PANTALLA 2P-A: CONFIGURACIÓN 2 JUGADORES ============ -->
-      <section id="pantalla-2p-setup" class="pantalla">
+      <section id="pantalla-2p-setup" class="pantalla pantalla--estadio">
         <h2 class="titulo-seccion">Modo 2 Jugadores 👥</h2>
         <p class="subtitulo">Cada quien elige su crack. Misma dificultad para una
           competencia justa.</p>
@@ -130,7 +130,11 @@
       </section>
 
       <!-- ============ PANTALLA 2P-C: RESULTADO 2 JUGADORES ============ -->
-      <section id="pantalla-2p-fin" class="pantalla">
+      <section id="pantalla-2p-fin" class="pantalla pantalla--estadio">
+        <div class="confeti" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
         <h2 class="titulo-seccion" id="titulo-ganador">Resultado</h2>
         <p class="resultado">
           <span id="resumen-p1">Jugador 1: 0</span><br />
@@ -143,8 +147,12 @@
       </section>
 
       <!-- ============ PANTALLA 4: GAME OVER ============ -->
-      <section id="pantalla-fin" class="pantalla">
-        <h2 class="titulo-seccion">¡Se cayó el balón! 😵</h2>
+      <section id="pantalla-fin" class="pantalla pantalla--estadio">
+        <div class="confeti" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <h2 class="titulo-seccion titulo-fin">¡Se cayó el balón! 😵</h2>
         <p class="resultado">
           Hiciste <span id="puntaje-final">0</span> dominadas.
         </p>

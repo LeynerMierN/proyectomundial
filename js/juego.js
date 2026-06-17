@@ -1,137 +1,128 @@
 /**
  * juego.js
  * -----------------------------------------------------------------------------
- * Lógica del juego de dominadas. Aquí vive la FÍSICA, el DIBUJO y el bucle
- * principal.
+ * Motor del juego de dominadas. Contiene:
  *
- * Idea del juego: un balón cae por gravedad. El jugador debe tocarlo (clic o
- * barra espaciadora) para impulsarlo hacia arriba. Cada toque suma una dominada.
- * Si el balón toca el suelo, la partida termina.
+ *   1) crearPartida(lienzo, jugador, dificultad)
+ *      Una "fábrica" que devuelve UNA partida independiente: tiene su propio
+ *      balón, puntaje, física y dibujo sobre su propio canvas. Se reutiliza
+ *      tanto en 1 jugador como en cada mitad del modo de 2 jugadores (DRY).
  *
- * La dificultad (gravedad, fuerza, tolerancia) NO está fija: se recibe desde
- * data/dificultades.js al iniciar la partida.
+ *   2) Juego  -> controlador del modo de 1 JUGADOR (usa una sola partida).
+ *      Juego.iniciar(jugador, dificultad, alTerminar)
+ *      Juego.detener()
  *
- * Se expone un único objeto global `Juego`:
- *   Juego.iniciar(jugador, dificultad, alTerminar) -> arranca una partida.
- *   Juego.detener()                                -> detiene el bucle.
+ * El modo de 2 jugadores vive en dosjugadores.js y también usa crearPartida().
  */
 
-const Juego = (function () {
-  // ----- Constantes que NO dependen de la dificultad -----
-  const RADIO_BALON = 24; // tamaño del balón en píxeles.
-  const TOLERANCIA_BASE = 22; // margen base de toque alrededor del balón.
+// Constantes que NO dependen de la dificultad ni del tamaño del canvas.
+const RADIO_BALON = 22;
+const TOLERANCIA_BASE = 22;
 
-  // ----- Estado de la partida (se reinicia en cada juego) -----
-  let lienzo, contexto;
+/**
+ * Crea una partida independiente sobre un canvas dado.
+ * @param {HTMLCanvasElement} lienzo - el canvas donde se dibuja.
+ * @param {Object} jugador - avatar (de JUGADORES).
+ * @param {Object} dificultad - nivel (de DIFICULTADES).
+ * @returns {Object} API de la partida (ver el return al final).
+ */
+function crearPartida(lienzo, jugador, dificultad) {
+  const contexto = lienzo.getContext("2d");
+
+  // Estado propio de esta partida.
   let balon;
-  let puntaje;
-  let jugadorActual;
-  let dificultadActual;
-  let gravedad; // valor que crece durante la partida.
-  let alTerminarCallback;
-  let idAnimacion = null;
-  let animacionToque = 0; // contador para la animación del avatar al patear.
+  let puntaje = 0;
+  let gravedad = dificultad.gravedadInicial;
+  let animacionToque = 0;
+  let viva = true;
 
-  /**
-   * Prepara el tamaño del lienzo según su contenedor.
-   */
-  function configurarLienzo() {
-    lienzo = buscar("#lienzo-juego");
-    contexto = lienzo.getContext("2d");
-    lienzo.width = lienzo.clientWidth || 700;
-    lienzo.height = lienzo.clientHeight || 420;
+  /** Ajusta el tamaño interno del canvas al tamaño que ocupa en pantalla. */
+  function configurar() {
+    lienzo.width = lienzo.clientWidth || 360;
+    lienzo.height = lienzo.clientHeight || 480;
+    reiniciarBalon();
   }
 
-  /**
-   * Coloca el balón en su posición inicial con una velocidad suave.
-   */
+  /** Coloca el balón arriba con un leve desvío horizontal. */
   function reiniciarBalon() {
     balon = {
       x: lienzo.width / 2,
       y: RADIO_BALON + 10,
-      vx: (Math.random() - 0.5) * 3, // pequeño desvío horizontal aleatorio.
+      vx: (Math.random() - 0.5) * 3,
       vy: 0,
     };
   }
 
-  /**
-   * Devuelve la coordenada Y del suelo (donde empieza el césped).
-   * Es el 58% de la altura, igual que el degradado del fondo.
-   */
+  /** Coordenada Y del suelo (inicio del césped). */
   function obtenerSuelo() {
     return lienzo.height * 0.58;
   }
 
   /**
-   * Aplica un impulso hacia arriba al balón (una dominada exitosa).
-   * @param {number} offsetX - distancia horizontal del toque al centro del
-   *   balón; añade efecto lateral para que el juego sea más dinámico.
+   * Impulsa el balón hacia arriba (una dominada).
+   * @param {number} offsetX - desfase horizontal del toque para dar efecto.
    */
-  function patearBalon(offsetX) {
-    balon.vy = dificultadActual.fuerzaToque;
+  function patear(offsetX) {
+    balon.vy = dificultad.fuerzaToque;
     balon.vx = limitar(balon.vx - offsetX * 0.08, -7, 7);
     puntaje++;
     animacionToque = 12;
     Sonidos.toque(puntaje);
     aumentarDificultad();
-    actualizarMarcador();
   }
 
-  /**
-   * Sube la gravedad poco a poco cada 5 dominadas para que la dificultad
-   * crezca de forma progresiva (sin pasar del tope del nivel).
-   */
+  /** Sube la gravedad cada 5 dominadas, sin pasar del tope del nivel. */
   function aumentarDificultad() {
     if (puntaje % 5 === 0) {
       gravedad = limitar(
-        gravedad + dificultadActual.incremento,
-        dificultadActual.gravedadInicial,
-        dificultadActual.gravedadMaxima
+        gravedad + dificultad.incremento,
+        dificultad.gravedadInicial,
+        dificultad.gravedadMaxima
       );
     }
   }
 
-  /**
-   * Comprueba si un clic/tap tocó el balón y, si fue así, lo patea.
-   * La zona de toque depende del control del jugador y de la dificultad.
-   * @param {number} x - coordenada X del toque dentro del lienzo.
-   * @param {number} y - coordenada Y del toque dentro del lienzo.
-   */
-  function intentarToque(x, y) {
-    const tolerancia =
-      TOLERANCIA_BASE +
-      jugadorActual.control * 2 +
-      dificultadActual.toleranciaExtra;
-    if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia) {
-      patearBalon(x - balon.x);
+  /** Margen de toque según el control del jugador y la dificultad. */
+  function tolerancia() {
+    return TOLERANCIA_BASE + jugador.control * 2 + dificultad.toleranciaExtra;
+  }
+
+  /** Intenta tocar en una coordenada del canvas; patea si acierta el balón. */
+  function tocarEn(x, y) {
+    if (!viva) return;
+    if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia()) {
+      patear(x - balon.x);
     }
   }
 
+  /** Toca el centro del balón (siempre acierta): para teclado. */
+  function tocarCentro() {
+    if (viva) patear(0);
+  }
+
   /**
-   * Actualiza la posición del balón según su velocidad y la gravedad.
-   * También rebota el balón contra las paredes laterales.
-   * @returns {boolean} true si el balón sigue en juego; false si tocó el suelo.
+   * Avanza la física un fotograma.
+   * @returns {boolean} si la partida sigue viva.
    */
-  function actualizarFisica() {
+  function actualizar() {
+    if (!viva) return false;
     balon.vy += gravedad;
     balon.x += balon.vx;
     balon.y += balon.vy;
 
-    // Rebote en las paredes izquierda y derecha.
     if (balon.x - RADIO_BALON < 0 || balon.x + RADIO_BALON > lienzo.width) {
       balon.vx *= -1;
       balon.x = limitar(balon.x, RADIO_BALON, lienzo.width - RADIO_BALON);
     }
 
-    // ¿Tocó el suelo? -> fin de la partida.
-    return balon.y + RADIO_BALON < obtenerSuelo();
+    if (balon.y + RADIO_BALON >= obtenerSuelo()) {
+      viva = false;
+    }
+    return viva;
   }
 
-  // ----------------------------------------------------------------------------
-  //  DIBUJO (inspirado en el estadio del video de referencia)
-  // ----------------------------------------------------------------------------
+  // -------- Dibujo del estadio (cada partida pinta en su canvas) --------
 
-  /** Dibuja el cielo con un degradado y rayos de sol desde arriba. */
   function dibujarCielo() {
     const cielo = contexto.createLinearGradient(0, 0, 0, obtenerSuelo());
     cielo.addColorStop(0, "#7ec8f0");
@@ -139,7 +130,6 @@ const Juego = (function () {
     contexto.fillStyle = cielo;
     contexto.fillRect(0, 0, lienzo.width, obtenerSuelo());
 
-    // Rayos de sol: triángulos claros que salen del centro superior.
     contexto.save();
     contexto.translate(lienzo.width / 2, -20);
     contexto.fillStyle = "rgba(255, 255, 200, 0.18)";
@@ -147,21 +137,18 @@ const Juego = (function () {
       contexto.rotate((Math.PI * 2) / 8);
       contexto.beginPath();
       contexto.moveTo(0, 0);
-      contexto.lineTo(-40, lienzo.height);
-      contexto.lineTo(40, lienzo.height);
+      contexto.lineTo(-30, lienzo.height);
+      contexto.lineTo(30, lienzo.height);
       contexto.closePath();
       contexto.fill();
     }
     contexto.restore();
   }
 
-  /** Dibuja las gradas con público (puntos de colores). */
   function dibujarGradas() {
     const yGrada = obtenerSuelo() - 46;
     contexto.fillStyle = "#3a3f4b";
     contexto.fillRect(0, yGrada, lienzo.width, 46);
-
-    // Público: filas de pequeños puntos de colores variados.
     const colores = ["#ff5252", "#ffd54f", "#4fc3f7", "#fff", "#81c784"];
     for (let fila = 0; fila < 3; fila++) {
       for (let x = 6; x < lienzo.width; x += 12) {
@@ -173,40 +160,33 @@ const Juego = (function () {
     }
   }
 
-  /** Dibuja el césped con franjas claras y oscuras. */
   function dibujarCesped() {
     const inicio = obtenerSuelo();
     const alto = lienzo.height - inicio;
     contexto.fillStyle = "#2e8b57";
     contexto.fillRect(0, inicio, lienzo.width, alto);
-
     contexto.fillStyle = "rgba(255, 255, 255, 0.06)";
     const numFranjas = 6;
+    const ancho = lienzo.width / numFranjas;
     for (let i = 0; i < numFranjas; i += 2) {
-      const ancho = lienzo.width / numFranjas;
       contexto.fillRect(i * ancho, inicio, ancho, alto);
     }
   }
 
-  /** Dibuja el contador grande de dominadas, centrado en el cielo. */
+  /** Contador grande centrado; su tamaño se adapta a la altura del canvas. */
   function dibujarContador() {
     contexto.save();
     contexto.textAlign = "center";
     contexto.textBaseline = "middle";
-    contexto.font = "bold 90px Segoe UI, Arial";
+    contexto.font = `bold ${Math.round(lienzo.height * 0.2)}px Segoe UI, Arial`;
     contexto.lineWidth = 6;
     contexto.strokeStyle = "rgba(0, 0, 0, 0.25)";
     contexto.fillStyle = "rgba(255, 255, 255, 0.92)";
-    const x = lienzo.width / 2;
-    const y = lienzo.height * 0.26;
-    contexto.strokeText(puntaje, x, y);
-    contexto.fillText(puntaje, x, y);
+    contexto.strokeText(puntaje, lienzo.width / 2, lienzo.height * 0.26);
+    contexto.fillText(puntaje, lienzo.width / 2, lienzo.height * 0.26);
     contexto.restore();
   }
 
-  /**
-   * Dibuja el balón de fútbol (círculo blanco con un centro oscuro).
-   */
   function dibujarBalon() {
     contexto.save();
     contexto.beginPath();
@@ -223,12 +203,8 @@ const Juego = (function () {
     contexto.restore();
   }
 
-  /**
-   * Dibuja al avatar del jugador en la parte inferior, con sus colores.
-   * Hace una pequeña animación de "patada" cuando se toca el balón.
-   */
   function dibujarAvatar() {
-    const baseX = balon.x; // el jugador sigue al balón horizontalmente.
+    const baseX = balon.x;
     const baseY = lienzo.height - 8;
     const inclina = animacionToque > 0 ? -6 : 0;
     if (animacionToque > 0) animacionToque--;
@@ -242,133 +218,151 @@ const Juego = (function () {
     contexto.moveTo(baseX, baseY - 30);
     contexto.lineTo(baseX + 8 + inclina, baseY + inclina);
     contexto.stroke();
-    contexto.fillStyle = jugadorActual.colorPrimario;
+    contexto.fillStyle = jugador.colorPrimario;
     contexto.fillRect(baseX - 12, baseY - 55, 24, 28);
     contexto.beginPath();
     contexto.arc(baseX, baseY - 64, 10, 0, Math.PI * 2);
-    contexto.fillStyle = jugadorActual.colorPiel;
+    contexto.fillStyle = jugador.colorPiel;
     contexto.fill();
     contexto.restore();
   }
 
-  /** Pinta una escena completa del estadio en orden (fondo -> frente). */
-  function dibujarEscena() {
+  /** Si la partida murió, oscurece el campo y muestra "FUERA". */
+  function dibujarFueraDeJuego() {
+    contexto.save();
+    contexto.fillStyle = "rgba(0, 0, 0, 0.5)";
+    contexto.fillRect(0, 0, lienzo.width, lienzo.height);
+    contexto.fillStyle = "#fff";
+    contexto.textAlign = "center";
+    contexto.textBaseline = "middle";
+    contexto.font = "bold 28px Segoe UI, Arial";
+    contexto.fillText("¡FUERA! 😵", lienzo.width / 2, lienzo.height / 2);
+    contexto.restore();
+  }
+
+  /** Pinta una escena completa. */
+  function dibujar() {
     dibujarCielo();
     dibujarGradas();
     dibujarCesped();
     dibujarContador();
     dibujarBalon();
     dibujarAvatar();
+    if (!viva) dibujarFueraDeJuego();
   }
 
-  /**
-   * Refresca el número del marcador superior en pantalla.
-   */
-  function actualizarMarcador() {
-    buscar("#marcador-puntaje").textContent = puntaje;
-  }
+  return {
+    configurar,
+    tocarEn,
+    tocarCentro,
+    actualizar,
+    dibujar,
+    get puntaje() {
+      return puntaje;
+    },
+    get viva() {
+      return viva;
+    },
+  };
+}
 
-  /**
-   * Dibuja un fotograma completo: actualiza la física y repinta. Si el balón
-   * cayó, termina la partida.
-   */
-  function bucle() {
-    const sigueVivo = actualizarFisica();
-    dibujarEscena();
+/**
+ * Convierte las coordenadas de un evento (ratón o tacto) a coordenadas internas
+ * del canvas indicado. Función compartida por ambos modos.
+ * @param {HTMLCanvasElement} lienzo
+ * @param {MouseEvent|Touch} evento
+ * @returns {{x:number, y:number}}
+ */
+function coordenadasEnLienzo(lienzo, evento) {
+  const rect = lienzo.getBoundingClientRect();
+  return {
+    x: (evento.clientX - rect.left) * (lienzo.width / rect.width),
+    y: (evento.clientY - rect.top) * (lienzo.height / rect.height),
+  };
+}
 
-    if (!sigueVivo) {
-      terminarPartida();
-      return;
-    }
-    idAnimacion = requestAnimationFrame(bucle);
-  }
+// ============================================================================
+//  Controlador del modo de 1 JUGADOR
+// ============================================================================
+const Juego = (function () {
+  let lienzo;
+  let partida;
+  let alTerminarCallback;
+  let idAnimacion = null;
 
-  /**
-   * Convierte las coordenadas de un evento del ratón/tacto a coordenadas
-   * internas del lienzo y prueba el toque.
-   * @param {MouseEvent|Touch} evento
-   */
   function manejarToque(evento) {
-    const rect = lienzo.getBoundingClientRect();
-    const x = (evento.clientX - rect.left) * (lienzo.width / rect.width);
-    const y = (evento.clientY - rect.top) * (lienzo.height / rect.height);
-    intentarToque(x, y);
+    const p = coordenadasEnLienzo(lienzo, evento);
+    partida.tocarEn(p.x, p.y);
   }
 
-  /** Maneja la barra espaciadora: patea el balón si está al alcance. */
+  function manejarTactil(evento) {
+    evento.preventDefault();
+    manejarToque(evento.touches[0]);
+  }
+
   function manejarTecla(evento) {
     if (evento.code === "Space") {
       evento.preventDefault();
-      intentarToque(balon.x, balon.y); // tocar el centro = siempre acierta.
+      partida.tocarCentro();
     }
   }
 
-  /** Conecta los eventos de entrada (ratón, tacto, teclado). */
   function activarControles() {
     lienzo.addEventListener("mousedown", manejarToque);
     lienzo.addEventListener("touchstart", manejarTactil);
     document.addEventListener("keydown", manejarTecla);
   }
 
-  /** Adaptador para eventos táctiles (toma el primer dedo). */
-  function manejarTactil(evento) {
-    evento.preventDefault();
-    manejarToque(evento.touches[0]);
-  }
-
-  /** Desconecta los eventos (al terminar o salir) para evitar duplicados. */
   function desactivarControles() {
     lienzo.removeEventListener("mousedown", manejarToque);
     lienzo.removeEventListener("touchstart", manejarTactil);
     document.removeEventListener("keydown", manejarTecla);
   }
 
-  /**
-   * Cierra la partida: detiene el bucle, libera controles, suena el resultado
-   * y avisa a main.js mediante el callback.
-   */
-  function terminarPartida() {
-    detener();
-    const esRecord = guardarRecordSiEsMayor(puntaje);
-    if (esRecord && puntaje > 0) {
-      Sonidos.record();
-    } else {
-      Sonidos.gameOver();
+  function bucle() {
+    const viva = partida.actualizar();
+    partida.dibujar();
+    buscar("#marcador-puntaje").textContent = partida.puntaje;
+
+    if (!viva) {
+      terminarPartida();
+      return;
     }
-    alTerminarCallback(puntaje, esRecord);
+    idAnimacion = requestAnimationFrame(bucle);
   }
 
-  // ---------------- Métodos públicos ----------------
+  function terminarPartida() {
+    detener();
+    const esRecord = guardarRecordSiEsMayor(partida.puntaje);
+    if (esRecord && partida.puntaje > 0) Sonidos.record();
+    else Sonidos.gameOver();
+    alTerminarCallback(partida.puntaje, esRecord);
+  }
 
   /**
-   * Arranca una partida nueva con el jugador y la dificultad elegidos.
-   * @param {Object} jugador - avatar seleccionado.
-   * @param {Object} dificultad - nivel elegido (de DIFICULTADES).
-   * @param {Function} alTerminar - callback(puntaje, esRecord) al perder.
+   * Arranca una partida de 1 jugador.
+   * @param {Object} jugador
+   * @param {Object} dificultad
+   * @param {Function} alTerminar - callback(puntaje, esRecord).
    */
   function iniciar(jugador, dificultad, alTerminar) {
-    jugadorActual = jugador;
-    dificultadActual = dificultad;
+    lienzo = buscar("#lienzo-juego");
     alTerminarCallback = alTerminar;
-    puntaje = 0;
-    gravedad = dificultad.gravedadInicial;
-
-    configurarLienzo();
-    reiniciarBalon();
+    partida = crearPartida(lienzo, jugador, dificultad);
+    partida.configurar();
     activarControles();
 
     buscar("#marcador-jugador").textContent = jugador.bandera;
     buscar("#marcador-record").textContent = leerRecord();
-    actualizarMarcador();
+    buscar("#marcador-puntaje").textContent = 0;
 
     bucle();
   }
 
-  /** Detiene el bucle y los controles sin terminar la partida formalmente. */
   function detener() {
     if (idAnimacion) cancelAnimationFrame(idAnimacion);
     idAnimacion = null;
-    desactivarControles();
+    if (lienzo) desactivarControles();
   }
 
   return { iniciar, detener };

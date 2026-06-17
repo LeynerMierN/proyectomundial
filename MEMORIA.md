@@ -29,6 +29,7 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Sonidos con **Web Audio API** (no .mp3) | Sin archivos ni descargas; solo HTML/CSS/JS y offline. |
 | Dificultad en `data/dificultades.js` | Separar el balance (datos) de la lógica; fácil de ajustar. |
 | Fondo de estadio dibujado en canvas | Inspirado en un video de referencia (estadio + contador grande). |
+| Formato **vertical** (retrato, tipo celular) | El `#app` mide ~430px de ancho; selección en 2 columnas con scroll y juego en retrato, igual que el video. |
 
 ---
 

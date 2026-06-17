@@ -44,8 +44,9 @@ body {
 
 /* ---------- 2. Layout general y pantallas ---------- */
 #app {
-  width: min(960px, 96vw);
-  height: min(620px, 94vh);
+  /* Formato vertical tipo celular (retrato) */
+  width: min(430px, 96vw);
+  height: min(820px, 95vh);
   position: relative;
 }
 
@@ -60,6 +61,14 @@ body {
   gap: 18px;
   text-align: center;
   padding: 24px;
+  overflow-y: auto; /* permite scroll si el contenido no cabe (selección) */
+}
+
+/* La selección puede ser alta: se alinea arriba y se desplaza si hace falta. */
+#pantalla-seleccion {
+  justify-content: flex-start;
+  padding-top: 16px;
+  gap: 12px;
 }
 
 .pantalla--activa {
@@ -142,10 +151,9 @@ body {
 /* ---------- 4. Pantalla de selección de avatares ---------- */
 .grid-avatares {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   width: 100%;
-  max-width: 860px;
 }
 
 .tarjeta-avatar {

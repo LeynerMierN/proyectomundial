@@ -22,7 +22,12 @@
       <section id="pantalla-inicio" class="pantalla pantalla--activa">
         <h1 class="titulo">⚽ Mundial de Dominadas</h1>
         <p class="subtitulo">Toca el balón, no lo dejes caer y haz historia.</p>
-        <button id="btn-empezar" class="boton boton--principal">JUGAR</button>
+        <button id="btn-empezar" class="boton boton--principal">
+          👤 1 Jugador
+        </button>
+        <button id="btn-dos-jugadores" class="boton boton--secundario">
+          👥 2 Jugadores
+        </button>
         <p class="record-inicio">
           🏆 Récord máximo: <span id="record-inicio">0</span>
         </p>
@@ -69,6 +74,68 @@
         </p>
       </section>
 
+      <!-- ============ PANTALLA 2P-A: CONFIGURACIÓN 2 JUGADORES ============ -->
+      <section id="pantalla-2p-setup" class="pantalla">
+        <h2 class="titulo-seccion">Modo 2 Jugadores 👥</h2>
+        <p class="subtitulo">Cada quien elige su crack. Misma dificultad para una
+          competencia justa.</p>
+        <div class="config-2p">
+          <div class="config-2p__jugador">
+            <label class="config-2p__etiqueta" for="select-p1">
+              🔵 Jugador 1 <small>(tecla A)</small>
+            </label>
+            <select id="select-p1" class="select-jugador"></select>
+          </div>
+          <div class="config-2p__jugador">
+            <label class="config-2p__etiqueta" for="select-p2">
+              🔴 Jugador 2 <small>(tecla L)</small>
+            </label>
+            <select id="select-p2" class="select-jugador"></select>
+          </div>
+        </div>
+        <p class="etiqueta-dificultad">Dificultad</p>
+        <div id="selector-dificultad-2p" class="selector-dificultad"></div>
+        <div class="botones-fin">
+          <button id="btn-2p-jugar" class="boton boton--principal">¡A jugar!</button>
+          <button id="btn-2p-volver" class="boton boton--secundario">Volver</button>
+        </div>
+      </section>
+
+      <!-- ============ PANTALLA 2P-B: JUEGO DIVIDIDO ============ -->
+      <section id="pantalla-2p-juego" class="pantalla">
+        <div class="campos-2p">
+          <div class="campo-2p">
+            <div class="campo-2p__cabecera campo-2p__cabecera--p1">
+              <span id="nombre-p1">Jugador 1</span>
+              <span class="campo-2p__puntaje" id="puntaje-p1">0</span>
+            </div>
+            <canvas id="lienzo-p1" class="lienzo lienzo--2p"></canvas>
+            <p class="campo-2p__tecla">Tecla <kbd>A</kbd> o clic</p>
+          </div>
+          <div class="campo-2p">
+            <div class="campo-2p__cabecera campo-2p__cabecera--p2">
+              <span id="nombre-p2">Jugador 2</span>
+              <span class="campo-2p__puntaje" id="puntaje-p2">0</span>
+            </div>
+            <canvas id="lienzo-p2" class="lienzo lienzo--2p"></canvas>
+            <p class="campo-2p__tecla">Tecla <kbd>L</kbd> o clic</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PANTALLA 2P-C: RESULTADO 2 JUGADORES ============ -->
+      <section id="pantalla-2p-fin" class="pantalla">
+        <h2 class="titulo-seccion" id="titulo-ganador">Resultado</h2>
+        <p class="resultado">
+          <span id="resumen-p1">Jugador 1: 0</span><br />
+          <span id="resumen-p2">Jugador 2: 0</span>
+        </p>
+        <div class="botones-fin">
+          <button id="btn-2p-revancha" class="boton boton--principal">Revancha</button>
+          <button id="btn-2p-menu" class="boton boton--secundario">Menú</button>
+        </div>
+      </section>
+
       <!-- ============ PANTALLA 4: GAME OVER ============ -->
       <section id="pantalla-fin" class="pantalla">
         <h2 class="titulo-seccion">¡Se cayó el balón! 😵</h2>
@@ -99,6 +166,7 @@
     <script src="js/sonidos.js"></script>
     <script src="js/avatares.js"></script>
     <script src="js/juego.js"></script>
+    <script src="js/dosjugadores.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

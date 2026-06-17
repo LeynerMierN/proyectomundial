@@ -18,7 +18,7 @@ y debes mantener el balón en el aire haciendo **dominadas**:
 - El balón cae por **gravedad**.
 - Tócalo con **clic / tap** o con la **barra espaciadora** para impulsarlo.
 - Cada toque = **+1 dominada** (con efecto de sonido que sube de tono).
-- La dificultad sube progresivamente (la gravedad aumenta cada 5 dominadas).
+- La dificultad sube progresivamente (la gravedad aumenta cada 8 dominadas).
 - Si el balón toca el suelo → **Game Over**.
 - Tu **récord** se guarda en el navegador (`localStorage`) y persiste.
 

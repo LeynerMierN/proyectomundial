@@ -57,9 +57,11 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 La gravedad, fuerza y tolerancia ahora viven por nivel en
 `js/data/dificultades.js` (Fácil / Normal / Difícil). En `js/juego.js` solo
 quedan las constantes que no dependen del nivel:
-- `RADIO_BALON = 24`, `TOLERANCIA_BASE = 22`.
-- La gravedad sube `incremento` (según nivel) cada 5 dominadas, hasta
-  `gravedadMaxima`.
+- `RADIO_BALON = 22`, `TOLERANCIA_BASE = 10` (zona de clic ajustada para más
+  dificultad). La tolerancia total = `TOLERANCIA_BASE + control*1.5 +
+  toleranciaExtra` del nivel.
+- La gravedad sube `incremento` (según nivel) cada **8 dominadas** (8, 16, 24…),
+  hasta `gravedadMaxima`.
 
 > Si un nivel se siente muy difícil/fácil, edita su objeto en `dificultades.js`.
 

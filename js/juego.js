@@ -17,7 +17,9 @@
 
 // Constantes que NO dependen de la dificultad ni del tamaño del canvas.
 const RADIO_BALON = 22;
-const TOLERANCIA_BASE = 22;
+// Margen base alrededor del balón para aceptar un clic. Reducido para que
+// acertar el toque sea más difícil (zona de clic más ajustada).
+const TOLERANCIA_BASE = 10;
 
 /**
  * Crea una partida independiente sobre un canvas dado.
@@ -71,9 +73,9 @@ function crearPartida(lienzo, jugador, dificultad) {
     aumentarDificultad();
   }
 
-  /** Sube la gravedad cada 5 dominadas, sin pasar del tope del nivel. */
+  /** Sube la gravedad cada 8 dominadas (8, 16, 24...), sin pasar del tope. */
   function aumentarDificultad() {
-    if (puntaje % 5 === 0) {
+    if (puntaje % 8 === 0) {
       gravedad = limitar(
         gravedad + dificultad.incremento,
         dificultad.gravedadInicial,
@@ -84,7 +86,7 @@ function crearPartida(lienzo, jugador, dificultad) {
 
   /** Margen de toque según el control del jugador y la dificultad. */
   function tolerancia() {
-    return TOLERANCIA_BASE + jugador.control * 2 + dificultad.toleranciaExtra;
+    return TOLERANCIA_BASE + jugador.control * 1.5 + dificultad.toleranciaExtra;
   }
 
   /** Intenta tocar en una coordenada del canvas; patea si acierta el balón. */

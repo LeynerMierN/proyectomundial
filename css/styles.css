@@ -34,12 +34,38 @@
 body {
   font-family: var(--fuente);
   color: var(--color-texto);
-  background: radial-gradient(circle at top, #16324f, var(--color-cielo));
+  background: radial-gradient(circle at 50% -10%, #1d4368, var(--color-cielo) 65%);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+/* Reflectores de estadio que barren el fondo de toda la página. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 0deg,
+    rgba(120, 190, 255, 0.1) 25deg,
+    transparent 55deg,
+    rgba(255, 214, 10, 0.08) 130deg,
+    transparent 170deg,
+    rgba(120, 190, 255, 0.1) 250deg,
+    transparent 300deg
+  );
+  animation: girar-reflectores 18s linear infinite;
+  z-index: 0;
+}
+
+@keyframes girar-reflectores {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ---------- 2. Layout general y pantallas ---------- */
@@ -48,6 +74,12 @@ body {
   width: min(430px, 96vw);
   height: min(820px, 95vh);
   position: relative;
+  z-index: 1;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(22, 50, 79, 0.7), rgba(10, 25, 41, 0.7));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
 /* Cada pantalla ocupa todo el contenedor. Solo la activa se muestra. */
@@ -89,8 +121,39 @@ body {
 
 /* ---------- 3. Componentes reutilizables ---------- */
 .titulo {
-  font-size: clamp(2rem, 6vw, 3.4rem);
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.05;
+  /* Texto con degradado metálico animado (brillo deportivo). */
+  background: linear-gradient(
+    100deg,
+    #ffd60a 0%,
+    #ffffff 25%,
+    #4fc3f7 50%,
+    #ffffff 75%,
+    #ffd60a 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+  animation: brillo-titulo 5s linear infinite, flotar-titulo 3.5s ease-in-out infinite;
+}
+
+@keyframes brillo-titulo {
+  to {
+    background-position: 220% center;
+  }
+}
+
+@keyframes flotar-titulo {
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .titulo-seccion {
@@ -98,6 +161,8 @@ body {
 }
 
 .subtitulo {
+  position: relative;
+  z-index: 2;
   font-size: 1.05rem;
   opacity: 0.85;
   max-width: 480px;
@@ -117,15 +182,38 @@ body {
   transform: scale(0.96);
 }
 
+/* Variante "llena" usada en el menú: más ancha y con icono. */
+.boton--lleno {
+  position: relative;
+  z-index: 2;
+  width: min(280px, 80%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.boton__icono {
+  font-size: 1.3rem;
+  transition: transform 0.2s ease;
+}
+
+.boton--lleno:hover .boton__icono {
+  transform: scale(1.25) rotate(-8deg);
+}
+
 .boton--principal {
-  background: var(--color-acento);
+  background: linear-gradient(135deg, #ffe34d, var(--color-acento));
   color: #1a1a1a;
-  box-shadow: var(--sombra);
+  box-shadow: 0 6px 18px rgba(255, 214, 10, 0.35), var(--sombra);
 }
 
 .boton--principal:hover:not(:disabled) {
   background: var(--color-acento-hover);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 26px rgba(255, 214, 10, 0.5);
 }
 
 .boton--principal:disabled {
@@ -144,8 +232,117 @@ body {
 }
 
 .record-inicio {
+  position: relative;
+  z-index: 2;
   font-size: 1rem;
   opacity: 0.9;
+}
+
+/* ---------- 3b. Menú deportivo (pantalla de inicio) ---------- */
+/* Césped con franjas que se desplazan lentamente, en la mitad inferior. */
+.cancha-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 45%,
+      rgba(46, 139, 87, 0.35) 45%,
+      rgba(31, 107, 65, 0.5) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0 28px,
+      transparent 28px 56px
+    );
+  background-size: 100% 100%, 112px 100%;
+  animation: panear-cancha 6s linear infinite;
+}
+
+@keyframes panear-cancha {
+  to {
+    background-position: 0 0, 112px 0;
+  }
+}
+
+/* Halo de reflectores suave detrás del título. */
+.reflectores {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  width: 120%;
+  height: 70%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(120, 200, 255, 0.22),
+    transparent 60%
+  );
+  animation: latir-reflectores 4s ease-in-out infinite;
+}
+
+@keyframes latir-reflectores {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Balón que rebota cerca del título. */
+.balon-bote {
+  position: absolute;
+  top: 12%;
+  font-size: 2.6rem;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.4));
+  animation: botar 1.4s cubic-bezier(0.5, 0.05, 0.5, 1) infinite,
+    girar-balon 1.4s linear infinite;
+}
+
+@keyframes botar {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(0.9);
+  }
+  50% {
+    transform: translateY(-44px) scaleY(1.05);
+  }
+}
+
+@keyframes girar-balon {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Chip estilo "marcador" para el récord. */
+.chip-record {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 214, 10, 0.4);
+  font-size: 0.95rem;
+}
+
+.chip-record strong {
+  color: var(--color-acento);
+  font-size: 1.1rem;
+}
+
+/* Respeta a quien prefiere menos animación. */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .titulo,
+  .cancha-fondo,
+  .reflectores,
+  .balon-bote {
+    animation: none;
+  }
 }
 
 /* ---------- 4. Pantalla de selección de avatares ---------- */

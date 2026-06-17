@@ -32,6 +32,7 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Formato **vertical** (retrato, tipo celular) | El `#app` mide ~430px de ancho; selección en 2 columnas con scroll y juego en retrato, igual que el video. |
 | Motor refactorizado a `crearPartida()` | Una "fábrica" de partidas independientes; el mismo código sirve para 1 jugador y para cada mitad del modo 2 jugadores (DRY). |
 | 2 jugadores **local en pantalla dividida** | El online (2 PCs) necesitaría servidor (WebSockets), prohibido en HTML/CSS/JS puro. Local: J1 tecla A, J2 tecla L. |
+| Menú deportivo animado (solo CSS) | Reflectores giratorios, cancha con franjas en movimiento, balón que rebota, título con brillo metálico y botones con glow. Respeta `prefers-reduced-motion`. |
 
 ---
 

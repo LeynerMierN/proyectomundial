@@ -20,16 +20,22 @@
     <main id="app">
       <!-- ============ PANTALLA 1: INICIO ============ -->
       <section id="pantalla-inicio" class="pantalla pantalla--activa">
-        <h1 class="titulo">⚽ Mundial de Dominadas</h1>
+        <!-- Decoración animada (no interactiva): cancha + reflectores + balón -->
+        <div class="cancha-fondo" aria-hidden="true"></div>
+        <div class="reflectores" aria-hidden="true"></div>
+        <div class="balon-bote" aria-hidden="true">⚽</div>
+
+        <h1 class="titulo">Mundial de Dominadas</h1>
         <p class="subtitulo">Toca el balón, no lo dejes caer y haz historia.</p>
-        <button id="btn-empezar" class="boton boton--principal">
-          👤 1 Jugador
+        <button id="btn-empezar" class="boton boton--principal boton--lleno">
+          <span class="boton__icono">👤</span> 1 Jugador
         </button>
-        <button id="btn-dos-jugadores" class="boton boton--secundario">
-          👥 2 Jugadores
+        <button id="btn-dos-jugadores" class="boton boton--secundario boton--lleno">
+          <span class="boton__icono">👥</span> 2 Jugadores
         </button>
         <p class="record-inicio">
-          🏆 Récord máximo: <span id="record-inicio">0</span>
+          <span class="chip-record">🏆 Récord máximo:
+            <strong id="record-inicio">0</strong></span>
         </p>
       </section>
 

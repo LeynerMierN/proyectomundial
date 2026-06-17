@@ -281,13 +281,11 @@ body {
 }
 
 .lienzo {
-  background: linear-gradient(
-    to bottom,
-    #87ceeb 0%,
-    #b8e0a0 55%,
-    var(--color-cesped) 55%,
-    var(--color-cesped-oscuro) 100%
-  );
+  /* Llena todo el ancho y el alto disponible de la pantalla de juego. */
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 380px;
+  background: #7ec8f0; /* color de respaldo; el estadio se dibuja en canvas */
   border-radius: var(--radio);
   box-shadow: var(--sombra);
   display: block;

@@ -30,6 +30,8 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Dificultad en `data/dificultades.js` | Separar el balance (datos) de la lógica; fácil de ajustar. |
 | Fondo de estadio dibujado en canvas | Inspirado en un video de referencia (estadio + contador grande). |
 | Formato **vertical** (retrato, tipo celular) | El `#app` mide ~430px de ancho; selección en 2 columnas con scroll y juego en retrato, igual que el video. |
+| Motor refactorizado a `crearPartida()` | Una "fábrica" de partidas independientes; el mismo código sirve para 1 jugador y para cada mitad del modo 2 jugadores (DRY). |
+| 2 jugadores **local en pantalla dividida** | El online (2 PCs) necesitaría servidor (WebSockets), prohibido en HTML/CSS/JS puro. Local: J1 tecla A, J2 tecla L. |
 
 ---
 
@@ -41,10 +43,12 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 - `sonidos.js` → módulo `Sonidos` (Web Audio): `toque`, `record`, `gameOver`,
   `boton`, `alternarMute`.
 - `avatares.js` → `crearSvgAvatar`, `construirPantallaSeleccion`.
-- `juego.js` → módulo `Juego` con la física y el dibujo del estadio:
-  `actualizarFisica`, `patearBalon`, `dibujarEscena`, `bucle`, etc.
-- `main.js` → coordina pantallas, dificultad y sonido: `mostrarPantalla`,
-  `seleccionarDificultad`, `comenzarPartida`, `mostrarResultado`, `alternarSonido`.
+- `juego.js` → `crearPartida()` (fábrica reutilizable con física + dibujo) y el
+  controlador `Juego` del modo 1 jugador.
+- `dosjugadores.js` → `Juego2P`: dos partidas a la vez en pantalla dividida.
+- `main.js` → coordina pantallas, dificultad, sonido y ambos modos:
+  `mostrarPantalla`, `seleccionarDificultad`, `comenzarPartida`,
+  `comenzarRonda2P`, `mostrarResultado2P`, `alternarSonido`.
 
 ---
 
@@ -75,6 +79,9 @@ quedan las constantes que no dependen del nivel:
 - [x] Niveles de dificultad (Fácil / Normal / Difícil).
 - [x] Sonidos con Web Audio API + botón de silenciar.
 - [x] Fondo de estadio y contador grande (inspirado en video de referencia).
+- [x] Formato vertical (retrato).
+- [x] Motor refactorizado a `crearPartida()` (reutilizable).
+- [x] Modo 2 jugadores en pantalla dividida (local) con ganador.
 - [ ] Mapa del mundo (fase 2).
 
 ---

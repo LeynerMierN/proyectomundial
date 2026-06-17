@@ -31,6 +31,17 @@ Antes de jugar eliges un nivel que cambia la física:
 - 🟡 **Normal** — equilibrado.
 - 🔴 **Difícil** — cae rápido, sin margen extra y sube de dificultad más rápido.
 
+### 👥 Modo 2 jugadores (pantalla dividida)
+Dos personas juegan **a la vez en la misma computadora**, cada una en su mitad:
+- 🔵 **Jugador 1** impulsa su balón con la tecla **A** (o clic en su campo).
+- 🔴 **Jugador 2** con la tecla **L** (o clic en su campo).
+- Cuando a alguien se le cae el balón queda "FUERA"; cuando ambos caen, se
+  comparan los puntajes y **gana el de más dominadas**.
+
+> Nota: el multijugador *online* (dos computadoras por internet) NO es posible
+> con solo HTML/CSS/JS porque requiere un servidor; por eso el 2 jugadores es
+> local en pantalla dividida.
+
 ### 🔊 Sonidos
 Todos los efectos se generan **por código con la Web Audio API** (sin archivos
 de audio): toque del balón, récord, game over y clics de botones. Hay un botón
@@ -65,7 +76,8 @@ proyectomundial/
 │   ├── utils.js            # Funciones de utilidad (localStorage, mates)
 │   ├── sonidos.js          # Efectos de sonido (Web Audio API, sin archivos)
 │   ├── avatares.js         # Genera los SVG y la pantalla de selección
-│   ├── juego.js            # Lógica del juego: física, dibujo y bucle (canvas)
+│   ├── juego.js            # Motor: crearPartida() + modo 1 jugador
+│   ├── dosjugadores.js     # Modo 2 jugadores (pantalla dividida)
 │   └── main.js             # Coordina pantallas, dificultad, sonido y botones
 ├── assets/                 # Reservada para imágenes/sonidos futuros
 ├── README.md               # Este archivo
@@ -117,6 +129,8 @@ la defensa. Ver `PRESENTACION.md` para el detalle del proceso y los prompts.
 - [x] Niveles de dificultad (Fácil / Normal / Difícil).
 - [x] Sonidos y efectos (Web Audio API) con botón de silenciar.
 - [x] Fondo de estadio y contador grande (inspirado en juego de referencia).
+- [x] Formato vertical (retrato, tipo celular).
+- [x] Modo 2 jugadores en pantalla dividida (local).
 - [ ] Mapa del mundo con **7 países**, cada uno con una actividad deportiva
       (USA → dominadas, Colombia → penaltis, Europa → cabezazos, etc.).
 - [ ] Tabla de puntuaciones por jugador.

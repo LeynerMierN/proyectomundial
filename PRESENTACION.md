@@ -102,6 +102,28 @@ Inspirados en un juego de referencia (estadio + contador grande), agregamos:
 → Se crea un `AudioContext` y, por cada efecto, un `OscillatorNode` con una
 frecuencia y un `GainNode` con un "fade out" (ver `tono()` en `sonidos.js`).
 
+### Modo 2 jugadores (iteración 3)
+
+Para permitir que **dos personas jueguen a la vez en la misma computadora**,
+refactorizamos el motor con una **fábrica `crearPartida()`** (`juego.js`): cada
+llamada devuelve una partida independiente (su balón, puntaje, física y dibujo
+sobre su propio canvas). Así el mismo código se reutiliza (DRY):
+
+- **1 jugador** (`Juego`) usa **una** partida.
+- **2 jugadores** (`Juego2P` en `dosjugadores.js`) usa **dos** partidas y un solo
+  bucle que actualiza ambas. Jugador 1 = tecla **A**, Jugador 2 = tecla **L**.
+  Cuando ambos pierden el balón, se comparan puntajes y se declara ganador.
+
+**Pregunta de defensa típica:** *¿Por qué no hay multijugador online?* → Conectar
+dos computadoras por internet exige un servidor (p. ej. WebSockets), y el
+proyecto es solo HTML/CSS/JS sin backend; por eso el 2 jugadores es **local en
+pantalla dividida**.
+
+**Pregunta de defensa típica:** *¿Cómo controla cada quien solo su balón?* → En
+`manejarTecla` de `dosjugadores.js`, `KeyA` llama a `partida1.tocarCentro()` y
+`KeyL` a `partida2.tocarCentro()`; como cada partida es un objeto aparte, sus
+estados nunca se mezclan.
+
 ---
 
 ## 🤖 Cómo usamos la IA (y cómo explicar el código)

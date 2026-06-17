@@ -5,13 +5,16 @@
  * dibujo: solo COORDINA las pantallas y conecta los botones con las acciones.
  *
  * Flujo de pantallas:
- *   inicio -> seleccion -> juego -> fin -> (reintentar / cambiar avatar)
+ *   inicio -> seleccion (avatar + dificultad) -> juego -> fin
  *
- * Mantiene el mínimo de estado: qué jugador se eligió.
+ * Estado mínimo: qué jugador y qué dificultad se eligieron.
  */
 
 // Jugador actualmente seleccionado (objeto de JUGADORES). null = ninguno aún.
 let jugadorSeleccionado = null;
+
+// Dificultad seleccionada. Por defecto: "normal".
+let dificultadSeleccionada = buscarDificultadPorId("normal");
 
 /**
  * Muestra una pantalla y oculta todas las demás.
@@ -25,7 +28,7 @@ function mostrarPantalla(idPantalla) {
 }
 
 /**
- * Marca visualmente la tarjeta elegida y habilita el botón de jugar.
+ * Marca visualmente la tarjeta de avatar elegida y guarda la selección.
  * @param {HTMLElement} tarjeta - la tarjeta sobre la que se hizo clic.
  */
 function seleccionarTarjeta(tarjeta) {
@@ -38,12 +41,41 @@ function seleccionarTarjeta(tarjeta) {
 }
 
 /**
- * Arranca una partida con el jugador seleccionado y pasa a la pantalla de juego.
+ * Crea los botones de dificultad a partir de DIFICULTADES y marca "normal".
+ */
+function construirSelectorDificultad() {
+  const contenedor = buscar("#selector-dificultad");
+  DIFICULTADES.forEach((nivel) => {
+    const boton = document.createElement("button");
+    boton.className = "boton-dificultad";
+    boton.dataset.id = nivel.id;
+    boton.textContent = `${nivel.icono} ${nivel.nombre}`;
+    if (nivel.id === dificultadSeleccionada.id) {
+      boton.classList.add("boton-dificultad--activa");
+    }
+    contenedor.appendChild(boton);
+  });
+}
+
+/**
+ * Marca visualmente el nivel de dificultad elegido y lo guarda.
+ * @param {HTMLElement} boton - el botón de dificultad pulsado.
+ */
+function seleccionarDificultad(boton) {
+  document.querySelectorAll(".boton-dificultad").forEach((b) => {
+    b.classList.remove("boton-dificultad--activa");
+  });
+  boton.classList.add("boton-dificultad--activa");
+  dificultadSeleccionada = buscarDificultadPorId(boton.dataset.id);
+}
+
+/**
+ * Arranca una partida con el jugador y la dificultad seleccionados.
  */
 function comenzarPartida() {
   if (!jugadorSeleccionado) return;
   mostrarPantalla("pantalla-juego");
-  Juego.iniciar(jugadorSeleccionado, mostrarResultado);
+  Juego.iniciar(jugadorSeleccionado, dificultadSeleccionada, mostrarResultado);
 }
 
 /**
@@ -53,7 +85,7 @@ function comenzarPartida() {
  */
 function mostrarResultado(puntaje, esRecord) {
   buscar("#puntaje-final").textContent = puntaje;
-  buscar("#mensaje-record").classList.toggle("oculto", !esRecord);
+  buscar("#mensaje-record").classList.toggle("oculto", !esRecord || puntaje === 0);
   mostrarPantalla("pantalla-fin");
 }
 
@@ -65,24 +97,48 @@ function refrescarRecordInicio() {
 }
 
 /**
+ * Alterna el sonido global y actualiza el icono del botón.
+ */
+function alternarSonido() {
+  const silenciado = Sonidos.alternarMute();
+  buscar("#btn-sonido").textContent = silenciado ? "🔇" : "🔊";
+  if (!silenciado) Sonidos.boton(); // confirma que volvió a sonar.
+}
+
+/**
  * Conecta todos los botones y eventos de la interfaz una sola vez.
  */
 function conectarEventos() {
   buscar("#btn-empezar").addEventListener("click", () => {
+    Sonidos.boton();
     mostrarPantalla("pantalla-seleccion");
   });
 
   buscar("#grid-avatares").addEventListener("click", (evento) => {
     const tarjeta = evento.target.closest(".tarjeta-avatar");
-    if (tarjeta) seleccionarTarjeta(tarjeta);
+    if (tarjeta) {
+      Sonidos.boton();
+      seleccionarTarjeta(tarjeta);
+    }
+  });
+
+  buscar("#selector-dificultad").addEventListener("click", (evento) => {
+    const boton = evento.target.closest(".boton-dificultad");
+    if (boton) {
+      Sonidos.boton();
+      seleccionarDificultad(boton);
+    }
   });
 
   buscar("#btn-jugar").addEventListener("click", comenzarPartida);
   buscar("#btn-reintentar").addEventListener("click", comenzarPartida);
 
   buscar("#btn-cambiar-avatar").addEventListener("click", () => {
+    Sonidos.boton();
     mostrarPantalla("pantalla-seleccion");
   });
+
+  buscar("#btn-sonido").addEventListener("click", alternarSonido);
 }
 
 /**
@@ -90,6 +146,7 @@ function conectarEventos() {
  */
 function iniciarApp() {
   construirPantallaSeleccion();
+  construirSelectorDificultad();
   refrescarRecordInicio();
   conectarEventos();
 }

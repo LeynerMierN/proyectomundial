@@ -12,6 +12,11 @@
       JavaScript muestra/oculta cada pantalla según el estado del juego.
       Solo una pantalla tiene la clase `pantalla--activa` a la vez.
     -->
+    <!-- Botón flotante para silenciar/activar el sonido en todo el juego -->
+    <button id="btn-sonido" class="boton-sonido" title="Silenciar / activar sonido">
+      🔊
+    </button>
+
     <main id="app">
       <!-- ============ PANTALLA 1: INICIO ============ -->
       <section id="pantalla-inicio" class="pantalla pantalla--activa">
@@ -32,6 +37,11 @@
         </p>
         <!-- Las tarjetas de avatar se generan con JavaScript -->
         <div id="grid-avatares" class="grid-avatares"></div>
+
+        <!-- Selector de dificultad: los botones se generan con JavaScript -->
+        <p class="etiqueta-dificultad">Dificultad</p>
+        <div id="selector-dificultad" class="selector-dificultad"></div>
+
         <button id="btn-jugar" class="boton boton--principal" disabled>
           ¡A jugar!
         </button>
@@ -84,7 +94,9 @@
       módulos que dependen de ellos, y por último main.js que coordina todo.
     -->
     <script src="js/data/jugadores.js"></script>
+    <script src="js/data/dificultades.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/sonidos.js"></script>
     <script src="js/avatares.js"></script>
     <script src="js/juego.js"></script>
     <script src="js/main.js"></script>

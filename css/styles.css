@@ -190,6 +190,66 @@ body {
   color: var(--color-acento);
 }
 
+/* ---------- 4b. Selector de dificultad ---------- */
+.etiqueta-dificultad {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.selector-dificultad {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.boton-dificultad {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: var(--radio);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-texto);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.boton-dificultad:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.boton-dificultad--activa {
+  border-color: var(--color-acento);
+  background: rgba(255, 214, 10, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.3);
+}
+
+/* Botón flotante de sonido (visible en todas las pantallas) */
+.boton-sonido {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 46px;
+  height: 46px;
+  font-size: 1.3rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.boton-sonido:hover {
+  transform: scale(1.08);
+  background: rgba(0, 0, 0, 0.65);
+}
+
 /* ---------- 5. Pantalla de juego ---------- */
 .marcador {
   display: flex;

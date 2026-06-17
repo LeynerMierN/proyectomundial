@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mundial de Dominadas ⚽</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!--
+      El juego usa UNA sola página HTML con varias "pantallas" (secciones).
+      JavaScript muestra/oculta cada pantalla según el estado del juego.
+      Solo una pantalla tiene la clase `pantalla--activa` a la vez.
+    -->
+    <main id="app">
+      <!-- ============ PANTALLA 1: INICIO ============ -->
+      <section id="pantalla-inicio" class="pantalla pantalla--activa">
+        <h1 class="titulo">⚽ Mundial de Dominadas</h1>
+        <p class="subtitulo">Toca el balón, no lo dejes caer y haz historia.</p>
+        <button id="btn-empezar" class="boton boton--principal">JUGAR</button>
+        <p class="record-inicio">
+          🏆 Récord máximo: <span id="record-inicio">0</span>
+        </p>
+      </section>
+
+      <!-- ============ PANTALLA 2: SELECCIÓN DE AVATAR ============ -->
+      <section id="pantalla-seleccion" class="pantalla">
+        <h2 class="titulo-seccion">Elige tu crack</h2>
+        <p class="subtitulo">
+          Cada jugador tiene una estadística de <strong>control</strong>
+          distinta.
+        </p>
+        <!-- Las tarjetas de avatar se generan con JavaScript -->
+        <div id="grid-avatares" class="grid-avatares"></div>
+        <button id="btn-jugar" class="boton boton--principal" disabled>
+          ¡A jugar!
+        </button>
+      </section>
+
+      <!-- ============ PANTALLA 3: JUEGO ============ -->
+      <section id="pantalla-juego" class="pantalla">
+        <header class="marcador">
+          <div class="marcador__item">
+            <span class="marcador__etiqueta">Jugador</span>
+            <span id="marcador-jugador" class="marcador__valor">—</span>
+          </div>
+          <div class="marcador__item">
+            <span class="marcador__etiqueta">Dominadas</span>
+            <span id="marcador-puntaje" class="marcador__valor">0</span>
+          </div>
+          <div class="marcador__item">
+            <span class="marcador__etiqueta">Récord</span>
+            <span id="marcador-record" class="marcador__valor">0</span>
+          </div>
+        </header>
+        <canvas id="lienzo-juego" class="lienzo"></canvas>
+        <p class="ayuda-juego">
+          🖱️ Haz clic en el balón &nbsp;|&nbsp; ⌨️ o pulsa la barra espaciadora
+        </p>
+      </section>
+
+      <!-- ============ PANTALLA 4: GAME OVER ============ -->
+      <section id="pantalla-fin" class="pantalla">
+        <h2 class="titulo-seccion">¡Se cayó el balón! 😵</h2>
+        <p class="resultado">
+          Hiciste <span id="puntaje-final">0</span> dominadas.
+        </p>
+        <p id="mensaje-record" class="mensaje-record oculto">
+          🎉 ¡Nuevo récord!
+        </p>
+        <div class="botones-fin">
+          <button id="btn-reintentar" class="boton boton--principal">
+            Reintentar
+          </button>
+          <button id="btn-cambiar-avatar" class="boton boton--secundario">
+            Cambiar jugador
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!--
+      Orden de carga importante: primero los datos y utilidades, luego los
+      módulos que dependen de ellos, y por último main.js que coordina todo.
+    -->
+    <script src="js/data/jugadores.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/avatares.js"></script>
+    <script src="js/juego.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

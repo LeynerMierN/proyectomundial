@@ -1,0 +1,290 @@
+/* =============================================================================
+   styles.css — Estilos visuales del Mundial de Dominadas
+   -----------------------------------------------------------------------------
+   Organización del archivo:
+     1. Variables y reset
+     2. Layout general y pantallas
+     3. Componentes reutilizables (botones, títulos)
+     4. Pantalla de selección de avatares
+     5. Pantalla de juego (marcador y lienzo)
+     6. Pantalla de fin
+     7. Utilidades y responsive
+   ========================================================================== */
+
+/* ---------- 1. Variables y reset ---------- */
+:root {
+  --color-cesped: #2e8b57;
+  --color-cesped-oscuro: #1f6b41;
+  --color-cielo: #0a1929;
+  --color-acento: #ffd60a;
+  --color-acento-hover: #ffe34d;
+  --color-texto: #ffffff;
+  --color-panel: rgba(0, 0, 0, 0.45);
+  --radio: 14px;
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --fuente: "Segoe UI", system-ui, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--fuente);
+  color: var(--color-texto);
+  background: radial-gradient(circle at top, #16324f, var(--color-cielo));
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ---------- 2. Layout general y pantallas ---------- */
+#app {
+  width: min(960px, 96vw);
+  height: min(620px, 94vh);
+  position: relative;
+}
+
+/* Cada pantalla ocupa todo el contenedor. Solo la activa se muestra. */
+.pantalla {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+}
+
+.pantalla--activa {
+  display: flex;
+  animation: aparecer 0.4s ease;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 3. Componentes reutilizables ---------- */
+.titulo {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.titulo-seccion {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.subtitulo {
+  font-size: 1.05rem;
+  opacity: 0.85;
+  max-width: 480px;
+}
+
+.boton {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 14px 38px;
+  border: none;
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.boton:active {
+  transform: scale(0.96);
+}
+
+.boton--principal {
+  background: var(--color-acento);
+  color: #1a1a1a;
+  box-shadow: var(--sombra);
+}
+
+.boton--principal:hover:not(:disabled) {
+  background: var(--color-acento-hover);
+  transform: translateY(-2px);
+}
+
+.boton--principal:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.boton--secundario {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-texto);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.boton--secundario:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.record-inicio {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* ---------- 4. Pantalla de selección de avatares ---------- */
+.grid-avatares {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 860px;
+}
+
+.tarjeta-avatar {
+  background: var(--color-panel);
+  border: 3px solid transparent;
+  border-radius: var(--radio);
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tarjeta-avatar:hover {
+  transform: translateY(-4px);
+}
+
+.tarjeta-avatar--activa {
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35);
+}
+
+.tarjeta-avatar svg {
+  width: 100%;
+  height: auto;
+}
+
+.tarjeta-avatar__nombre {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.tarjeta-avatar__pais {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.tarjeta-avatar__control {
+  font-size: 0.68rem;
+  color: var(--color-acento);
+}
+
+/* ---------- 5. Pantalla de juego ---------- */
+.marcador {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  background: var(--color-panel);
+  border-radius: var(--radio);
+  padding: 10px 16px;
+  margin-bottom: 10px;
+}
+
+.marcador__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.marcador__etiqueta {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
+
+.marcador__valor {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-acento);
+}
+
+.lienzo {
+  background: linear-gradient(
+    to bottom,
+    #87ceeb 0%,
+    #b8e0a0 55%,
+    var(--color-cesped) 55%,
+    var(--color-cesped-oscuro) 100%
+  );
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  display: block;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.ayuda-juego {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-top: 10px;
+}
+
+/* ---------- 6. Pantalla de fin ---------- */
+.resultado {
+  font-size: 1.3rem;
+}
+
+#puntaje-final {
+  color: var(--color-acento);
+  font-weight: 800;
+  font-size: 1.6rem;
+}
+
+.mensaje-record {
+  font-size: 1.2rem;
+  color: var(--color-acento);
+  font-weight: 700;
+  animation: latir 0.8s infinite alternate;
+}
+
+@keyframes latir {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.botones-fin {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ---------- 7. Utilidades y responsive ---------- */
+.oculto {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .grid-avatares {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .titulo {
+    font-size: 2rem;
+  }
+}

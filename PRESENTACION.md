@@ -84,6 +84,24 @@ Módulo `Juego` (patrón *IIFE* para encapsular el estado). Funciones clave:
 - Dificultad progresiva para que el juego no sea monótono.
 - Comentarios en todo el código para poder explicarlo.
 
+### Mejoras añadidas (iteración 2)
+
+Inspirados en un juego de referencia (estadio + contador grande), agregamos:
+
+- **Niveles de dificultad** (`data/dificultades.js` + `seleccionarDificultad`
+  en `main.js`): Fácil / Normal / Difícil cambian gravedad, fuerza de toque,
+  tolerancia y velocidad de incremento. Se eligen antes de jugar.
+- **Sonidos** (`sonidos.js`): módulo `Sonidos` con la **Web Audio API**. No usa
+  archivos de audio; sintetiza tonos en el momento (`toque` sube de tono con el
+  combo, `record`, `gameOver`, `boton`). Botón 🔊/🔇 para silenciar.
+- **Fondo de estadio** dibujado en canvas (`dibujarCielo`, `dibujarGradas`,
+  `dibujarCesped`, `dibujarContador`): cielo con rayos de sol, gradas con
+  público, césped a rayas y un contador grande central.
+
+**Pregunta de defensa típica:** *¿Cómo suenan los efectos sin archivos de audio?*
+→ Se crea un `AudioContext` y, por cada efecto, un `OscillatorNode` con una
+frecuencia y un `GainNode` con un "fade out" (ver `tono()` en `sonidos.js`).
+
 ---
 
 ## 🤖 Cómo usamos la IA (y cómo explicar el código)

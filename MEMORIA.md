@@ -26,30 +26,37 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Un archivo por responsabilidad | Cumple el rubric de orden (15%) y modularidad (25%). |
 | Récord en `localStorage` | Persistencia sin backend. |
 | Estadística de "control" por jugador | Hace que elegir avatar tenga impacto real en el juego. |
+| Sonidos con **Web Audio API** (no .mp3) | Sin archivos ni descargas; solo HTML/CSS/JS y offline. |
+| Dificultad en `data/dificultades.js` | Separar el balance (datos) de la lógica; fácil de ajustar. |
+| Fondo de estadio dibujado en canvas | Inspirado en un video de referencia (estadio + contador grande). |
 
 ---
 
 ## 🗂️ Mapa de archivos (qué hace cada uno)
 
 - `data/jugadores.js` → catálogo de los 10 avatares (solo datos).
+- `data/dificultades.js` → parámetros de los 3 niveles (solo datos).
 - `utils.js` → helpers genéricos: `buscar`, `leerRecord`, `limitar`, `distancia`.
+- `sonidos.js` → módulo `Sonidos` (Web Audio): `toque`, `record`, `gameOver`,
+  `boton`, `alternarMute`.
 - `avatares.js` → `crearSvgAvatar`, `construirPantallaSeleccion`.
-- `juego.js` → módulo `Juego` con la física: `actualizarFisica`, `patearBalon`,
-  `bucle`, etc.
-- `main.js` → coordina pantallas: `mostrarPantalla`, `comenzarPartida`,
-  `mostrarResultado`.
+- `juego.js` → módulo `Juego` con la física y el dibujo del estadio:
+  `actualizarFisica`, `patearBalon`, `dibujarEscena`, `bucle`, etc.
+- `main.js` → coordina pantallas, dificultad y sonido: `mostrarPantalla`,
+  `seleccionarDificultad`, `comenzarPartida`, `mostrarResultado`, `alternarSonido`.
 
 ---
 
 ## ⚙️ Parámetros de física (para ajustar la dificultad)
 
-Definidos en `js/juego.js`:
-- `GRAVEDAD_INICIAL = 0.25`, `GRAVEDAD_MAXIMA = 0.55`
-- `FUERZA_TOQUE = -9.5`
-- `RADIO_BALON = 24`, `TOLERANCIA_BASE = 26`
-- La gravedad sube `+0.03` cada 5 dominadas.
+La gravedad, fuerza y tolerancia ahora viven por nivel en
+`js/data/dificultades.js` (Fácil / Normal / Difícil). En `js/juego.js` solo
+quedan las constantes que no dependen del nivel:
+- `RADIO_BALON = 24`, `TOLERANCIA_BASE = 22`.
+- La gravedad sube `incremento` (según nivel) cada 5 dominadas, hasta
+  `gravedadMaxima`.
 
-> Si el juego se siente muy difícil/fácil, estos son los números a tocar.
+> Si un nivel se siente muy difícil/fácil, edita su objeto en `dificultades.js`.
 
 ---
 
@@ -63,8 +70,10 @@ Definidos en `js/juego.js`:
 - [x] Lógica del juego (física, bucle, puntuación, récord).
 - [x] Pantalla de Game Over con reinicio y cambio de avatar.
 - [x] README, memoria y presentación.
-- [ ] Pruebas en navegador y ajuste fino de dificultad.
-- [ ] Sonidos.
+- [x] Pruebas en navegador (flujo, puntuación, dificultad, mute) sin errores.
+- [x] Niveles de dificultad (Fácil / Normal / Difícil).
+- [x] Sonidos con Web Audio API + botón de silenciar.
+- [x] Fondo de estadio y contador grande (inspirado en video de referencia).
 - [ ] Mapa del mundo (fase 2).
 
 ---

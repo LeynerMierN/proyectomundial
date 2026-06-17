@@ -17,13 +17,24 @@ y debes mantener el balón en el aire haciendo **dominadas**:
 
 - El balón cae por **gravedad**.
 - Tócalo con **clic / tap** o con la **barra espaciadora** para impulsarlo.
-- Cada toque = **+1 dominada**.
+- Cada toque = **+1 dominada** (con efecto de sonido que sube de tono).
 - La dificultad sube progresivamente (la gravedad aumenta cada 5 dominadas).
 - Si el balón toca el suelo → **Game Over**.
 - Tu **récord** se guarda en el navegador (`localStorage`) y persiste.
 
 Cada jugador tiene una estadística de **control (1–10)**: a mayor control, más
 amplia es la zona de toque, así que **elegir avatar cambia la dificultad**.
+
+### 🎚️ Niveles de dificultad
+Antes de jugar eliges un nivel que cambia la física:
+- 🟢 **Fácil** — cae lento, zona de toque amplia.
+- 🟡 **Normal** — equilibrado.
+- 🔴 **Difícil** — cae rápido, sin margen extra y sube de dificultad más rápido.
+
+### 🔊 Sonidos
+Todos los efectos se generan **por código con la Web Audio API** (sin archivos
+de audio): toque del balón, récord, game over y clics de botones. Hay un botón
+🔊 / 🔇 (arriba a la derecha) para silenciar.
 
 ### Avatares disponibles
 Messi 🇦🇷 · Cristiano Ronaldo 🇵🇹 · Luis Díaz 🇨🇴 · Mbappé 🇫🇷 · Neymar 🇧🇷 ·
@@ -49,11 +60,13 @@ proyectomundial/
 │   └── styles.css          # Todos los estilos visuales
 ├── js/
 │   ├── data/
-│   │   └── jugadores.js     # Datos de los 10 avatares (sin lógica)
+│   │   ├── jugadores.js     # Datos de los 10 avatares (sin lógica)
+│   │   └── dificultades.js  # Parámetros de los 3 niveles de dificultad
 │   ├── utils.js            # Funciones de utilidad (localStorage, mates)
+│   ├── sonidos.js          # Efectos de sonido (Web Audio API, sin archivos)
 │   ├── avatares.js         # Genera los SVG y la pantalla de selección
-│   ├── juego.js            # Lógica del juego: física y bucle (canvas)
-│   └── main.js             # Coordina pantallas y conecta los botones
+│   ├── juego.js            # Lógica del juego: física, dibujo y bucle (canvas)
+│   └── main.js             # Coordina pantallas, dificultad, sonido y botones
 ├── assets/                 # Reservada para imágenes/sonidos futuros
 ├── README.md               # Este archivo
 ├── MEMORIA.md              # Bitácora y decisiones del proyecto
@@ -73,6 +86,10 @@ cada función hace **una sola cosa bien** (`crearSvgAvatar`, `patearBalon`,
   offline.
 - **`<canvas>` para el juego**: permite una animación fluida del balón con
   `requestAnimationFrame` y física simple (gravedad + impulso + rebotes).
+- **Sonidos con Web Audio API**: se sintetizan tonos por código en vez de cargar
+  archivos `.mp3`/`.wav`. Cero dependencias y funciona offline.
+- **Dificultad como datos**: los 3 niveles viven en `data/dificultades.js`, así
+  ajustar el balance no toca la lógica del juego.
 - **Sin frameworks**: cumple el requisito de *Vanilla JS* del curso.
 - **Estado mínimo y módulos por archivo**: se cargan en orden (datos → utils →
   avatares → juego → main) usando `<script>` clásicos, sin bundlers.
@@ -97,7 +114,9 @@ la defensa. Ver `PRESENTACION.md` para el detalle del proceso y los prompts.
 
 ## 🗺️ Próximos pasos (roadmap)
 
-- [ ] Sonidos y efectos al tocar el balón.
+- [x] Niveles de dificultad (Fácil / Normal / Difícil).
+- [x] Sonidos y efectos (Web Audio API) con botón de silenciar.
+- [x] Fondo de estadio y contador grande (inspirado en juego de referencia).
 - [ ] Mapa del mundo con **7 países**, cada uno con una actividad deportiva
       (USA → dominadas, Colombia → penaltis, Europa → cabezazos, etc.).
 - [ ] Tabla de puntuaciones por jugador.

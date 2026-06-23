@@ -20,6 +20,11 @@ y debes mantener el balón en el aire haciendo **dominadas**:
 - Cada toque = **+1 dominada** (con efecto de sonido que sube de tono).
 - La dificultad sube progresivamente (la gravedad aumenta cada 8 dominadas).
 - Si el balón toca el suelo → **Game Over**.
+- ⚠️ **Regla estricta de impacto:** no hay margen para fallar. Un **clic fuera
+  del balón**, o presionar **espacio cuando el balón no está a tu alcance**
+  (todavía muy arriba), termina la partida de inmediato como "¡Patada en
+  falso!" — igual que si se hubiera caído solo. No se puede "spamear" clics o
+  la barra espaciadora esperando suerte.
 - Tu **récord** se guarda en el navegador (`localStorage`) y persiste.
 
 Cada jugador tiene una estadística de **control (1–10)**: a mayor control, más

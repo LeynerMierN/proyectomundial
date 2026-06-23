@@ -124,6 +124,46 @@ pantalla dividida**.
 `KeyL` a `partida2.tocarCentro()`; como cada partida es un objeto aparte, sus
 estados nunca se mezclan.
 
+### Regla estricta de impacto (iteración 4)
+
+Al principio, un clic que no caía sobre el balón simplemente **no hacía
+nada**: el jugador podía "espamear" clics por toda la pantalla sin
+consecuencia, esperando acertar por suerte. Eso le quitaba reto al juego.
+Cambiamos la lógica a una estructura **if/else sin escape** en `tocarEn()` y
+`tocarCentro()` (`juego.js`):
+
+```js
+function tocarEn(x, y) {
+  if (!viva) return;
+  if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia()) {
+    patear(x - balon.x);   // ÉXITO: dentro de la zona del balón
+  } else {
+    fallar();              // FALTA: termina la partida YA, sin excepciones
+  }
+}
+```
+
+El reto fue la **barra espaciadora**: a diferencia del clic, no tiene
+coordenadas (x, y) que comparar contra el balón. La solución fue cambiar la
+pregunta de "¿DÓNDE tocaste?" a "¿CUÁNDO tocaste?": `zonaAlcance()` define una
+banda vertical cerca del suelo (del mismo tamaño que la tolerancia del clic,
+para que la dificultad sea consistente entre ambos controles). Si presionas
+espacio y el balón todavía está arriba, fuera de esa banda, también es falta.
+Así, tanto clic como teclado **exigen precisión real**, cada uno en su propia
+dimensión (espacio para el mouse, tiempo para el teclado).
+
+Para diferenciar "el balón cayó solo" de "el jugador falló", la partida guarda
+un `motivoDerrota` (`"suelo"` o `"falla"`), que cambia el mensaje, el color de
+la pantalla de Game Over (rojo para falta) y el sonido (`Sonidos.fallo()`, un
+doble buzz grave, distinto del tono descendente de `Sonidos.gameOver()`).
+
+**Pregunta de defensa típica:** *¿Cómo probaron que la regla funciona sin
+depender de animaciones lentas?* → Llamamos `crearPartida()` directamente y
+avanzamos `actualizar()` en un bucle `while` síncrono (sin `requestAnimationFrame`),
+lo que simula muchos fotogramas al instante y hace la prueba determinista —
+clave para distinguir un bug real de la simple lentitud del navegador al
+limitar `requestAnimationFrame` en pestañas en segundo plano.
+
 ---
 
 ## 🤖 Cómo usamos la IA (y cómo explicar el código)

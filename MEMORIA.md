@@ -34,6 +34,7 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | 2 jugadores **local en pantalla dividida** | El online (2 PCs) necesitaría servidor (WebSockets), prohibido en HTML/CSS/JS puro. Local: J1 tecla A, J2 tecla L. |
 | Menú deportivo animado (solo CSS) | Reflectores giratorios, cancha con franjas en movimiento, balón que rebota, título con brillo metálico y botones con glow. Respeta `prefers-reduced-motion`. |
 | Selección y fin también deportivos | Clase `.pantalla--estadio` (fondo compartido), tarjetas con entrada en cascada + glow + insignia ✓, puntaje con "pop", título con sacudida y **confeti** al lograr récord/ganar (clase `.celebrando`). |
+| Regla estricta de impacto (if/else sin escape) | Un clic fuera del balón, o espacio fuera de la zona de alcance, ya no se ignora: termina la partida de inmediato (`fallar()`). Antes un fallo simplemente no hacía nada y se podía "spamear" sin riesgo. |
 
 ---
 
@@ -45,8 +46,9 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 - `sonidos.js` → módulo `Sonidos` (Web Audio): `toque`, `record`, `gameOver`,
   `boton`, `alternarMute`.
 - `avatares.js` → `crearSvgAvatar`, `construirPantallaSeleccion`.
-- `juego.js` → `crearPartida()` (fábrica reutilizable con física + dibujo) y el
-  controlador `Juego` del modo 1 jugador.
+- `juego.js` → `crearPartida()` (fábrica reutilizable con física + dibujo,
+  incluye `tocarEn`/`tocarCentro`/`fallar` para la regla estricta de impacto)
+  y el controlador `Juego` del modo 1 jugador.
 - `dosjugadores.js` → `Juego2P`: dos partidas a la vez en pantalla dividida.
 - `main.js` → coordina pantallas, dificultad, sonido y ambos modos:
   `mostrarPantalla`, `seleccionarDificultad`, `comenzarPartida`,
@@ -64,6 +66,11 @@ quedan las constantes que no dependen del nivel:
   toleranciaExtra` del nivel.
 - La gravedad sube `incremento` (según nivel) cada **8 dominadas** (8, 16, 24…),
   hasta `gravedadMaxima`.
+- **Regla estricta:** un clic/tap que no caiga dentro de `RADIO_BALON +
+  tolerancia()` (alrededor del balón) es falta inmediata. Por teclado, la
+  "zona" es de tiempo, no de espacio: `zonaAlcance()` define una banda
+  vertical cerca del suelo (del mismo tamaño que la tolerancia del clic); si
+  presionas espacio y el balón no está en esa banda, también es falta.
 
 > Si un nivel se siente muy difícil/fácil, edita su objeto en `dificultades.js`.
 
@@ -86,6 +93,8 @@ quedan las constantes que no dependen del nivel:
 - [x] Formato vertical (retrato).
 - [x] Motor refactorizado a `crearPartida()` (reutilizable).
 - [x] Modo 2 jugadores en pantalla dividida (local) con ganador.
+- [x] Regla estricta de impacto: clic o espacio fuera de la zona = game over
+      inmediato (verificado con pruebas de física deterministas, sin rAF).
 - [ ] Mapa del mundo (fase 2).
 
 ---

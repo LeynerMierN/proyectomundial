@@ -327,7 +327,15 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
 
   function dibujarAvatar() {
     const baseX = balon.x;
-    const baseY = lienzo.height - 8;
+    // El avatar se dibuja de los pies hacia ARRIBA (cabeza, cuerpo y piernas
+    // quedan por encima de "baseY"). Para que la SILUETA completa quede
+    // centrada en el césped —y no solo los pies, que la dejaría viendo hacia
+    // la mitad superior— se le suma la mitad de su alto total (cabeza+cuerpo
+    // hasta los pies, ver dibujarAvatar más abajo: 64+10 unidades de diseño).
+    const inicioCesped = obtenerSuelo();
+    const centroCesped = inicioCesped + (lienzo.height - inicioCesped) / 2;
+    const mitadAltoAvatar = ((64 + 10) * ESCALA_AVATAR) / 2;
+    const baseY = centroCesped + mitadAltoAvatar;
     const inclina = (animacionToque > 0 ? -6 : 0) * ESCALA_AVATAR;
     if (animacionToque > 0) animacionToque--;
 

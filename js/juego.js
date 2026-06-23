@@ -3,10 +3,19 @@
  * -----------------------------------------------------------------------------
  * Motor del juego de dominadas. Contiene:
  *
- *   1) crearPartida(lienzo, jugador, dificultad)
+ *   1) crearPartida(lienzo, jugador, dificultad, opciones)
  *      Una "fábrica" que devuelve UNA partida independiente: tiene su propio
  *      balón, puntaje, física y dibujo sobre su propio canvas. Se reutiliza
  *      tanto en 1 jugador como en cada mitad del modo de 2 jugadores (DRY).
+ *
+ *      `opciones.alAnotar(info)` es un gancho OPCIONAL que se llama cada vez
+ *      que se acierta un toque. juego.js no sabe nada de "personalidad" o
+ *      mensajes de hinchada — eso vive en sazon.js. Aquí solo se REPORTA lo
+ *      que pasó (puntaje, jugador, si fue un toque "raspando" el borde, y una
+ *      función `pausar` para congelar la física unos milisegundos); quien
+ *      escucha decide qué hacer con esa información. Así el motor se queda
+ *      neutral y la "sazón" del juego (chiste, mensajes, hitos) se puede
+ *      cambiar sin tocar la física.
  *
  *   2) Juego  -> controlador del modo de 1 JUGADOR (usa una sola partida).
  *      Juego.iniciar(jugador, dificultad, alTerminar)
@@ -26,10 +35,18 @@ const TOLERANCIA_BASE = 10;
  * @param {HTMLCanvasElement} lienzo - el canvas donde se dibuja.
  * @param {Object} jugador - avatar (de JUGADORES).
  * @param {Object} dificultad - nivel (de DIFICULTADES).
+ * @param {Object} [opciones] - ganchos opcionales; ver `alAnotar` arriba.
  * @returns {Object} API de la partida (ver el return al final).
  */
-function crearPartida(lienzo, jugador, dificultad) {
+function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
   const contexto = lienzo.getContext("2d");
+
+  // Contenedor visual donde vive este canvas (la pantalla completa en 1
+  // jugador, o solo la mitad de esta persona en 2 jugadores). Se calcula una
+  // sola vez aquí porque cada quien que escuche `alAnotar` (p. ej. sazon.js)
+  // necesita saber EN QUÉ MITAD de la pantalla mostrar su mensaje, sin tener
+  // que adivinar la estructura del HTML por su cuenta.
+  const contenedor = lienzo.closest(".campo-2p, .pantalla") || lienzo.parentElement;
 
   // Estado propio de esta partida.
   let balon;
@@ -41,6 +58,11 @@ function crearPartida(lienzo, jugador, dificultad) {
   // jugador tocó/presionó fuera de la zona válida). Se usa para mostrar un
   // mensaje distinto y para no celebrar como si el balón hubiera caído solo.
   let motivoDerrota = "suelo";
+  // Pausa temporal (distinta de "viva"): permite congelar la física unos
+  // milisegundos sin terminar la partida, p. ej. para la mecánica de
+  // distracción de sazon.js. Mientras está en true, ningún clic/tecla cuenta
+  // (ni a favor ni en contra) y el balón no se mueve.
+  let pausado = false;
 
   /** Ajusta el tamaño interno del canvas al tamaño que ocupa en pantalla. */
   function configurar() {
@@ -67,14 +89,38 @@ function crearPartida(lienzo, jugador, dificultad) {
   /**
    * Impulsa el balón hacia arriba (una dominada).
    * @param {number} offsetX - desfase horizontal del toque para dar efecto.
+   * @param {boolean} fueRasguno - true si el toque acertó pero raspando el
+   *   borde de la zona válida (casi se le escapa). Es solo informativo: no
+   *   cambia la física, únicamente se reporta a quien escuche `alAnotar`.
    */
-  function patear(offsetX) {
+  function patear(offsetX, fueRasguno = false) {
     balon.vy = dificultad.fuerzaToque;
     balon.vx = limitar(balon.vx - offsetX * 0.08, -7, 7);
     puntaje++;
     animacionToque = 12;
     Sonidos.toque(puntaje);
     aumentarDificultad();
+    if (typeof opciones.alAnotar === "function") {
+      opciones.alAnotar({ puntaje, jugador, fueRasguno, contenedor, pausar });
+    }
+  }
+
+  /**
+   * Congela esta partida por `duracionMs` sin terminarla, y al reanudar le
+   * aplica un impulso vertical. Pensado para que sazon.js pueda "despistar"
+   * al jugador en un hito (p. ej. al llegar a 10 dominadas) sin acoplar esa
+   * idea a la física del juego.
+   * @param {number} duracionMs
+   * @param {number} [impulsoAlReanudar] - nueva velocidad vertical al volver.
+   */
+  function pausar(duracionMs, impulsoAlReanudar) {
+    if (!viva) return;
+    pausado = true;
+    setTimeout(() => {
+      if (!viva) return; // la partida pudo terminar mientras estaba en pausa.
+      pausado = false;
+      if (typeof impulsoAlReanudar === "number") balon.vy = impulsoAlReanudar;
+    }, duracionMs);
   }
 
   /** Sube la gravedad cada 8 dominadas (8, 16, 24...), sin pasar del tope. */
@@ -125,11 +171,18 @@ function crearPartida(lienzo, jugador, dificultad) {
    * Intenta tocar en una coordenada del canvas. Es estricto: si el clic/tap
    * no cae sobre el balón (dentro de la tolerancia), la partida termina ahí
    * mismo. Así ya no se puede "spamear clics" sin riesgo: cada intento cuenta.
+   * Mientras la partida está en pausa (ver `pausar`), se ignora el toque por
+   * completo: no debe contar ni a favor ni en contra.
    */
   function tocarEn(x, y) {
-    if (!viva) return;
-    if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia()) {
-      patear(x - balon.x);
+    if (!viva || pausado) return;
+    const distanciaAlCentro = distancia(x, y, balon.x, balon.y);
+    const limite = RADIO_BALON + tolerancia();
+    if (distanciaAlCentro <= limite) {
+      // "Raspó" el borde de la zona si quedó en el 20% más externo del
+      // margen permitido: acertó, pero por poco (para el aviso de susto).
+      const fueRasguno = distanciaAlCentro >= limite * 0.8;
+      patear(x - balon.x, fueRasguno);
     } else {
       fallar();
     }
@@ -138,13 +191,23 @@ function crearPartida(lienzo, jugador, dificultad) {
   /**
    * Toca el balón por teclado. Solo acierta si el balón está dentro de la
    * zona de alcance (ver zonaAlcance); fuera de tiempo, es una falta y
-   * termina la partida igual que un clic errado.
+   * termina la partida igual que un clic errado. Mismo criterio de pausa
+   * que `tocarEn`.
    */
   function tocarCentro() {
-    if (!viva) return;
+    if (!viva || pausado) return;
     const zona = zonaAlcance();
     if (balon.y >= zona.desde && balon.y <= zona.hasta) {
-      patear(0);
+      // "Raspó" si el balón está en el 20% más cercano al límite REAL que
+      // termina la partida (obtenerSuelo() - RADIO_BALON, ver actualizar()),
+      // el mismo criterio proporcional que usa el clic. No se usa un margen
+      // fijo en píxeles porque, al caer, el balón avanza cada vez más rápido
+      // por fotograma: un margen fijo pequeño podría "saltarse" entre un
+      // fotograma y el siguiente y nunca detectarse.
+      const limiteReal = obtenerSuelo() - RADIO_BALON;
+      const margenRasguno = (limiteReal - zona.desde) * 0.2;
+      const fueRasguno = limiteReal - balon.y <= margenRasguno;
+      patear(0, fueRasguno);
     } else {
       fallar();
     }
@@ -156,6 +219,7 @@ function crearPartida(lienzo, jugador, dificultad) {
    */
   function actualizar() {
     if (!viva) return false;
+    if (pausado) return true; // congelado: no hay gravedad ni movimiento.
     balon.vy += gravedad;
     balon.x += balon.vx;
     balon.y += balon.vy;
@@ -410,7 +474,7 @@ const Juego = (function () {
   function iniciar(jugador, dificultad, alTerminar) {
     lienzo = buscar("#lienzo-juego");
     alTerminarCallback = alTerminar;
-    partida = crearPartida(lienzo, jugador, dificultad);
+    partida = crearPartida(lienzo, jugador, dificultad, { alAnotar: Sazon.alAnotar });
     partida.configurar();
     activarControles();
 

@@ -128,6 +128,26 @@ que en 2 jugadores cada quien ve el suyo solo sobre SU mitad de la pantalla.
 > la regla de "ganar a las 21 dominadas": nuestro juego es de puntaje
 > infinito (compites contra tu récord), así que ese límite no aplicaba.
 
+## 🖼️ Foto real opcional para el avatar (uso privado/local)
+
+Por defecto cada jugador se dibuja como un muñeco vectorial por código (sin
+fotos), para evitar derechos de imagen y mantener el juego 100% offline sin
+archivos que descargar. Si igual quieres ver una foto real (por ejemplo, de
+Messi) **solo para tu copia local**, el sistema ya está listo:
+
+1. Coloca tu imagen en `assets/jugadores/<id>.png` (ej. `messi.png`).
+2. En `js/data/jugadores.js`, descomenta la línea `foto: "assets/..."` del
+   jugador correspondiente.
+3. Listo: `js/juego.js` detecta el campo `foto`, carga la imagen una sola vez
+   (`obtenerFotoJugador`) y la dibuja en `dibujarAvatarConFoto`. Si el archivo
+   no existe o aún no cargó, sigue mostrando el muñeco vectorial sin ningún
+   error — el cambio es 100% opcional y no rompe nada si no lo usas.
+
+> ⚠️ No se incluye ninguna foto real en este repositorio: son personas reales
+> identificables y subir esas imágenes a un repo público sí implica riesgo de
+> derechos de imagen. Por eso esta función es solo para **uso privado/local**,
+> a discreción de quien clona el proyecto.
+
 ## 🎨 CSS dividido en 9 archivos (en vez de uno gigante)
 
 Antes había un único `css/styles.css` de **más de 800 líneas**. Se dividió en
@@ -154,9 +174,11 @@ está en [`css/README.md`](css/README.md). En resumen:
 
 ## 🧠 Decisiones técnicas clave
 
-- **Avatares en SVG generado por código** en lugar de fotos reales: evita
+- **Avatares en SVG/canvas generado por código** en lugar de fotos reales: evita
   problemas de derechos de imagen, no requiere descargar archivos y funciona
-  offline.
+  offline. Cada jugador puede tener opcionalmente un campo `foto` (ruta a una
+  imagen local) que, si está presente, se dibuja en vez del muñeco — ver
+  sección siguiente.
 - **`<canvas>` para el juego**: permite una animación fluida del balón con
   `requestAnimationFrame` y física simple (gravedad + impulso + rebotes).
 - **Sonidos con Web Audio API**: se sintetizan tonos por código en vez de cargar

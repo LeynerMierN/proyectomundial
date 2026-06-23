@@ -35,6 +35,31 @@ const TOLERANCIA_BASE = 10;
 // pies (que siempre quedan fijos justo encima del césped).
 const ESCALA_AVATAR = 1.35;
 
+// Caché de fotos reales por id de jugador (ver `foto` en data/jugadores.js).
+// Es a nivel de módulo (no dentro de crearPartida) para que la imagen se
+// cargue UNA sola vez aunque el jugador juegue varias partidas seguidas.
+// Si un jugador no tiene `foto` definida, simplemente nunca aparece aquí y
+// se sigue usando el dibujo vectorial de respaldo (ver dibujarAvatar).
+const cacheFotosJugadores = {};
+
+/**
+ * Devuelve el <img> de la foto de un jugador, cargándola la primera vez que
+ * se pide. Mientras la imagen no haya terminado de cargar (es asíncrono),
+ * dibujarAvatar() sigue usando el muñeco vectorial sin que se note ningún
+ * error ni un parpadeo en blanco.
+ * @param {Object} jugador
+ * @returns {HTMLImageElement|null} null si el jugador no tiene foto definida.
+ */
+function obtenerFotoJugador(jugador) {
+  if (!jugador.foto) return null;
+  if (!cacheFotosJugadores[jugador.id]) {
+    const imagen = new Image();
+    imagen.src = jugador.foto;
+    cacheFotosJugadores[jugador.id] = imagen;
+  }
+  return cacheFotosJugadores[jugador.id];
+}
+
 /**
  * Crea una partida independiente sobre un canvas dado.
  * @param {HTMLCanvasElement} lienzo - el canvas donde se dibuja.
@@ -325,13 +350,19 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     contexto.restore();
   }
 
+  /**
+   * Dibuja al jugador. Si tiene una foto real definida (`jugador.foto`) y ya
+   * terminó de cargar, usa la foto; si no, dibuja el muñeco vectorial de
+   * siempre. Así un jugador puede tener foto real mientras los demás siguen
+   * con el dibujo por código, sin que ninguno de los dos casos se rompa.
+   */
   function dibujarAvatar() {
     const baseX = balon.x;
-    // El avatar se dibuja de los pies hacia ARRIBA (cabeza, cuerpo y piernas
-    // quedan por encima de "baseY"). Para que la SILUETA completa quede
-    // centrada en el césped —y no solo los pies, que la dejaría viendo hacia
-    // la mitad superior— se le suma la mitad de su alto total (cabeza+cuerpo
-    // hasta los pies, ver dibujarAvatar más abajo: 64+10 unidades de diseño).
+    // El avatar se apoya de los pies hacia ARRIBA (cabeza/cuerpo quedan por
+    // encima de "baseY"). Para que la SILUETA completa quede centrada en el
+    // césped —y no solo los pies, que la dejaría viendo hacia la mitad
+    // superior— se le suma la mitad de su alto total de diseño (64+10
+    // unidades, ver dibujarAvatarVectorial).
     const inicioCesped = obtenerSuelo();
     const centroCesped = inicioCesped + (lienzo.height - inicioCesped) / 2;
     const mitadAltoAvatar = ((64 + 10) * ESCALA_AVATAR) / 2;
@@ -339,6 +370,41 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     const inclina = (animacionToque > 0 ? -6 : 0) * ESCALA_AVATAR;
     if (animacionToque > 0) animacionToque--;
 
+    const foto = obtenerFotoJugador(jugador);
+    const fotoLista = foto && foto.complete && foto.naturalWidth > 0;
+    if (fotoLista) {
+      dibujarAvatarConFoto(foto, baseX, baseY, inclina);
+    } else {
+      dibujarAvatarVectorial(baseX, baseY, inclina);
+    }
+  }
+
+  /**
+   * Dibuja la foto real del jugador, del mismo alto aproximado que el muñeco
+   * vectorial (para que no se vea ni gigante ni diminuto al cambiar de
+   * avatar) y con los pies alineados en `baseY`, igual que la versión
+   * vectorial.
+   * @param {HTMLImageElement} foto
+   * @param {number} baseX
+   * @param {number} baseY
+   * @param {number} inclina - pequeño desfase horizontal al patear.
+   */
+  function dibujarAvatarConFoto(foto, baseX, baseY, inclina) {
+    const alto = 95 * ESCALA_AVATAR;
+    const ancho = alto * (foto.naturalWidth / foto.naturalHeight);
+    contexto.save();
+    contexto.drawImage(
+      foto,
+      baseX - ancho / 2 + inclina * 0.4,
+      baseY - alto,
+      ancho,
+      alto
+    );
+    contexto.restore();
+  }
+
+  /** El muñeco dibujado por código (piernas, camiseta y cabeza de color). */
+  function dibujarAvatarVectorial(baseX, baseY, inclina) {
     contexto.save();
     contexto.strokeStyle = "#1a1a1a";
     contexto.lineWidth = 6 * ESCALA_AVATAR;

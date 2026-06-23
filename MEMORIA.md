@@ -39,12 +39,15 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | "Sazón" como módulo separado de la física (`sazon.js`) | Se pidió integrar un mecanismo de mensajes de hinchada/hitos (inspirado en una propuesta externa con variables que no existían en este proyecto, como `ballTop` o `juegoActivo`). En vez de pegarlo tal cual, `crearPartida()` ganó un gancho opcional `alAnotar(info)` que solo REPORTA datos (puntaje, si fue un toque "raspando" el borde, el contenedor visual, y una función `pausar`); toda la personalidad (textos, cuándo mostrarlos) vive en `sazon.js`, que no toca física ni canvas. Así el motor se mantiene neutral y la "sazón" se puede cambiar de tono sin riesgo de romper el juego. |
 | Himno sintetizado (no audio remoto) | La propuesta original cargaba un sonido desde una URL de Google. Eso rompería el "100% offline" que ya promete el README y agrega una dependencia de red innecesaria. Se reemplazó por `Sonidos.himno()`, un arpegio generado con la misma Web Audio API que ya usábamos. |
 | Sin "victoria a las 21 dominadas" | La propuesta original mantenía esa regla de un diseño distinto (puntaje con tope). Nuestro juego es de **puntaje infinito** (compites contra tu récord), así que esa regla no aplicaba y no se portó. |
+| Campo `foto` opcional por jugador (no incluido en el repo) | Se pidió poder ver una foto real de Messi en vez del muñeco. Subir una foto real e identificable a un repositorio público implica riesgo de derechos de imagen, así que en vez de incluir el archivo se construyó **todo el sistema técnico**: `jugadores.js` documenta un campo opcional `foto`, `juego.js` lo carga con caché (`obtenerFotoJugador`) y lo dibuja (`dibujarAvatarConFoto`) si existe, cayendo de vuelta al muñeco vectorial (`dibujarAvatarVectorial`) si no hay archivo o todavía no cargó. El archivo en sí lo coloca cada quien de forma local/privada — nunca se sube al repo. |
 
 ---
 
 ## 🗂️ Mapa de archivos (qué hace cada uno)
 
-- `data/jugadores.js` → catálogo de los 10 avatares (solo datos).
+- `data/jugadores.js` → catálogo de los 10 avatares (solo datos). Incluye un
+  campo opcional `foto` (comentado por defecto) para quien quiera usar una
+  imagen real local en vez del muñeco vectorial.
 - `data/dificultades.js` → parámetros de los 3 niveles (solo datos).
 - `utils.js` → helpers genéricos: `buscar`, `leerRecord`, `limitar`, `distancia`.
 - `sonidos.js` → módulo `Sonidos` (Web Audio): `toque`, `record`, `gameOver`,
@@ -170,6 +173,10 @@ quedan las constantes que no dependen del nivel:
       Verificado con pruebas deterministas: evento se dispara con la forma
       correcta, las 4 ramas de `Sazon.alAnotar` se probaron por separado, y
       `pausar()` realmente congela e ignora toques durante la pausa.
+- [x] Soporte opcional de foto real por jugador (campo `foto`, con fallback
+      automático al muñeco vectorial). Verificado con pruebas deterministas:
+      sin `foto` definida, con una ruta que no existe, y con una imagen ya
+      cargada — las tres ramas dibujan sin lanzar errores en consola.
 - [ ] Mapa del mundo (fase 2).
 
 ---

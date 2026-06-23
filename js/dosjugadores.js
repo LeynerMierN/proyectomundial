@@ -103,8 +103,8 @@ const Juego2P = (function () {
     lienzo2 = buscar("#lienzo-p2");
     alTerminarCallback = alTerminar;
 
-    partida1 = crearPartida(lienzo1, jugador1, dificultad);
-    partida2 = crearPartida(lienzo2, jugador2, dificultad);
+    partida1 = crearPartida(lienzo1, jugador1, dificultad, { alAnotar: Sazon.alAnotar });
+    partida2 = crearPartida(lienzo2, jugador2, dificultad, { alAnotar: Sazon.alAnotar });
     partida1.configurar();
     partida2.configurar();
     activarControles();

@@ -37,6 +37,10 @@ function crearPartida(lienzo, jugador, dificultad) {
   let gravedad = dificultad.gravedadInicial;
   let animacionToque = 0;
   let viva = true;
+  // Por qué terminó la partida: "suelo" (el balón cayó solo) o "falla" (el
+  // jugador tocó/presionó fuera de la zona válida). Se usa para mostrar un
+  // mensaje distinto y para no celebrar como si el balón hubiera caído solo.
+  let motivoDerrota = "suelo";
 
   /** Ajusta el tamaño interno del canvas al tamaño que ocupa en pantalla. */
   function configurar() {
@@ -89,17 +93,61 @@ function crearPartida(lienzo, jugador, dificultad) {
     return TOLERANCIA_BASE + jugador.control * 1.5 + dificultad.toleranciaExtra;
   }
 
-  /** Intenta tocar en una coordenada del canvas; patea si acierta el balón. */
+  /**
+   * Banda vertical "alcanzable" para el toque por teclado. La barra
+   * espaciadora no tiene una posición de clic, así que en su lugar exige
+   * TIEMPO: solo cuenta si el balón ya está cerca del avatar (abajo), igual
+   * que en la vida real solo puedes golpear el balón cuando te llega al pie.
+   * Usa el mismo margen que el clic, así que la misma dificultad/control que
+   * agranda o achica la zona del clic también agranda o achica esta banda.
+   */
+  function zonaAlcance() {
+    const alto = (RADIO_BALON + tolerancia()) * 2;
+    const hasta = obtenerSuelo() - 4; // justo antes del límite que es derrota.
+    return { desde: hasta - alto, hasta };
+  }
+
+  /**
+   * Marca la partida como perdida por un toque fallido (clic fuera del balón
+   * o espacio fuera de tiempo). A diferencia de que el balón caiga solo, este
+   * es un error del jugador: por eso el balón "sale disparado" con fuerza,
+   * como castigo visual claro, y se guarda el motivo para mostrar un mensaje
+   * distinto al final.
+   */
+  function fallar() {
+    if (!viva) return;
+    viva = false;
+    motivoDerrota = "falla";
+    balon.vy = Math.max(12, Math.abs(dificultad.fuerzaToque) * 1.4);
+  }
+
+  /**
+   * Intenta tocar en una coordenada del canvas. Es estricto: si el clic/tap
+   * no cae sobre el balón (dentro de la tolerancia), la partida termina ahí
+   * mismo. Así ya no se puede "spamear clics" sin riesgo: cada intento cuenta.
+   */
   function tocarEn(x, y) {
     if (!viva) return;
     if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia()) {
       patear(x - balon.x);
+    } else {
+      fallar();
     }
   }
 
-  /** Toca el centro del balón (siempre acierta): para teclado. */
+  /**
+   * Toca el balón por teclado. Solo acierta si el balón está dentro de la
+   * zona de alcance (ver zonaAlcance); fuera de tiempo, es una falta y
+   * termina la partida igual que un clic errado.
+   */
   function tocarCentro() {
-    if (viva) patear(0);
+    if (!viva) return;
+    const zona = zonaAlcance();
+    if (balon.y >= zona.desde && balon.y <= zona.hasta) {
+      patear(0);
+    } else {
+      fallar();
+    }
   }
 
   /**
@@ -119,6 +167,9 @@ function crearPartida(lienzo, jugador, dificultad) {
 
     if (balon.y + RADIO_BALON >= obtenerSuelo()) {
       viva = false;
+      // Si ya estaba marcada como "falla" (un fallar() reciente la tumbó),
+      // se respeta ese motivo; si no, fue el balón cayendo solo.
+      if (motivoDerrota !== "falla") motivoDerrota = "suelo";
     }
     return viva;
   }
@@ -229,16 +280,21 @@ function crearPartida(lienzo, jugador, dificultad) {
     contexto.restore();
   }
 
-  /** Si la partida murió, oscurece el campo y muestra "FUERA". */
+  /** Si la partida murió, oscurece el campo y muestra el motivo. */
   function dibujarFueraDeJuego() {
+    const esFalla = motivoDerrota === "falla";
     contexto.save();
-    contexto.fillStyle = "rgba(0, 0, 0, 0.5)";
+    contexto.fillStyle = esFalla ? "rgba(130, 10, 10, 0.55)" : "rgba(0, 0, 0, 0.5)";
     contexto.fillRect(0, 0, lienzo.width, lienzo.height);
     contexto.fillStyle = "#fff";
     contexto.textAlign = "center";
     contexto.textBaseline = "middle";
-    contexto.font = "bold 28px Segoe UI, Arial";
-    contexto.fillText("¡FUERA! 😵", lienzo.width / 2, lienzo.height / 2);
+    contexto.font = "bold 26px Segoe UI, Arial";
+    contexto.fillText(
+      esFalla ? "¡FALTA! ❌" : "¡FUERA! 😵",
+      lienzo.width / 2,
+      lienzo.height / 2
+    );
     contexto.restore();
   }
 
@@ -264,6 +320,9 @@ function crearPartida(lienzo, jugador, dificultad) {
     },
     get viva() {
       return viva;
+    },
+    get motivoDerrota() {
+      return motivoDerrota;
     },
   };
 }
@@ -337,8 +396,9 @@ const Juego = (function () {
     detener();
     const esRecord = guardarRecordSiEsMayor(partida.puntaje);
     if (esRecord && partida.puntaje > 0) Sonidos.record();
+    else if (partida.motivoDerrota === "falla") Sonidos.fallo();
     else Sonidos.gameOver();
-    alTerminarCallback(partida.puntaje, esRecord);
+    alTerminarCallback(partida.puntaje, esRecord, partida.motivoDerrota);
   }
 
   /**

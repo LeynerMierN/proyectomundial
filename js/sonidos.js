@@ -7,7 +7,8 @@
  *
  * Se expone un objeto global `Sonidos` con métodos públicos:
  *   Sonidos.toque(combo) -> "pop" agudo que sube de tono con el combo.
- *   Sonidos.gameOver()   -> tono descendente de derrota.
+ *   Sonidos.gameOver()   -> tono descendente de derrota (el balón cayó solo).
+ *   Sonidos.fallo()      -> buzz grave de error (clic/espacio fuera de zona).
  *   Sonidos.record()     -> pequeño arpegio alegre.
  *   Sonidos.boton()      -> clic corto de interfaz.
  *   Sonidos.alternarMute() -> activa/desactiva el sonido; devuelve si está mute.
@@ -69,11 +70,17 @@ const Sonidos = (function () {
     tono(frecuencia, 0.12, "square", 0.15);
   }
 
-  /** Tono descendente al perder. */
+  /** Tono descendente al perder (el balón cayó solo). */
   function gameOver() {
     tono(300, 0.18, "sawtooth", 0.2);
     setTimeout(() => tono(200, 0.25, "sawtooth", 0.2), 120);
     setTimeout(() => tono(120, 0.35, "sawtooth", 0.2), 280);
+  }
+
+  /** Doble buzz grave: error del jugador (clic/espacio fuera de la zona). */
+  function fallo() {
+    tono(180, 0.15, "square", 0.22);
+    setTimeout(() => tono(140, 0.2, "square", 0.22), 90);
   }
 
   /** Arpegio alegre al batir un récord. */
@@ -102,5 +109,5 @@ const Sonidos = (function () {
     return silenciado;
   }
 
-  return { toque, gameOver, record, boton, alternarMute, estaSilenciado };
+  return { toque, gameOver, fallo, record, boton, alternarMute, estaSilenciado };
 })();

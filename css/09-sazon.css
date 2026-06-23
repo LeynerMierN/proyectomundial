@@ -1,0 +1,46 @@
+/**
+ * css/09-sazon.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 9 de 9 — Mensajes flotantes de "sazón" (js/sazon.js).
+ *
+ * Qué resuelve: el estilo del texto que aparece sobre el campo de juego con
+ * mensajes de hinchada costeña (elogios, sustos, hitos). El JS solo decide
+ * QUÉ texto mostrar y CUÁNDO (agregando/quitando la clase
+ * `.texto-sazon--visible`); todo el aspecto vive aquí, separado del
+ * comportamiento — así es más fácil cambiar el "look" sin tocar sazon.js.
+ *
+ * Se carga al final (después de 08-utilidades.css) porque es la
+ * incorporación más reciente y no necesita pelear la cascada con nada
+ * anterior: ninguna otra regla del proyecto usa la clase `.texto-sazon`.
+ */
+
+.texto-sazon {
+  position: absolute;
+  top: 38%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0 10px;
+  /* "Press Start 2P" es un guiño retro-arcade; si no está instalada en el
+     sistema (no la importamos de internet para no romper el modo offline),
+     el navegador simplemente usa el siguiente respaldo de la lista. */
+  font-family: "Press Start 2P", "Segoe UI", monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-acento);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  z-index: 50;
+  pointer-events: none; /* nunca debe robarle el clic al balón. */
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.texto-sazon--negativo {
+  color: #ff4757;
+}
+
+.texto-sazon--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

@@ -119,6 +119,10 @@ body.modo-dos #app {
 }
 
 .campo-2p {
+  /* position:relative convierte a cada mitad en su propio "marco" para que
+     el mensaje flotante de sazon.js (ver css/09-sazon.css) quede confinado
+     a la mitad de SU jugador y no se centre en toda la pantalla. */
+  position: relative;
   flex: 1 1 0;
   display: flex;
   flex-direction: column;

@@ -1,7 +1,7 @@
 # 🎨 CSS del Mundial de Dominadas
 
 Antes había **un solo archivo `styles.css` de más de 800 líneas**. Se dividió
-en **8 archivos**, uno por responsabilidad, para que cada parte se pueda
+en **9 archivos**, uno por responsabilidad, para que cada parte se pueda
 explicar por separado y sea más fácil encontrar qué tocar.
 
 ## ⚠️ El orden importa (cascada de CSS)
@@ -23,6 +23,7 @@ número ES el orden de carga, no solo un nombre bonito.
 | `06-juego.css` | Marcador y lienzo de 1 jugador, pantalla dividida de 2 jugadores, y el fondo de estadio + confeti que comparten selección/fin. | Juego (1 y 2 jugadores) |
 | `07-fin.css` | Pantalla de Game Over: puntaje, motivo, mensaje de récord, botones. | Game Over (1 jugador) |
 | `08-utilidades.css` | Clase `.oculto`, accesibilidad (`prefers-reduced-motion`) y ajustes para pantallas angostas. | Toda la app (va al final a propósito) |
+| `09-sazon.css` | Estilo del texto flotante de "sazón" (elogios, sustos, hitos) que muestra `js/sazon.js`. | Juego (1 y 2 jugadores) |
 
 ## 🧠 ¿Por qué `06-juego.css` incluye cosas de selección y fin?
 

@@ -31,6 +31,9 @@
   .mensaje-record {
     animation: none;
   }
+  .texto-sazon {
+    transition: none;
+  }
 }
 
 @media (max-width: 600px) {

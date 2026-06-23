@@ -24,7 +24,7 @@
  */
 
 const Sazon = (function () {
-  const ELOGIOS_COSTENOS = ["¡Monstruo!", "¡Erda, perfecto!", "¡Lindooooooo!", "¡Puro crack!"];
+  const ELOGIOS_COSTENOS = ["¡Monstruo!", "¡Erda, perfecto!", "¡Lindooooooo!", "¡Puro crack!",];
   const MENSAJES_AZARE = ["¡Uy, cuidado!", "¡Anda, casi la embarras!", "¡Ponte las pilas!"];
 
   // Cuánto dura el "despiste" del hito de las 10 dominadas, y con qué

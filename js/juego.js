@@ -29,6 +29,11 @@ const RADIO_BALON = 22;
 // Margen base alrededor del balón para aceptar un clic. Reducido para que
 // acertar el toque sea más difícil (zona de clic más ajustada).
 const TOLERANCIA_BASE = 10;
+// Tamaño del avatar (piernas, cuerpo y cabeza) respecto al diseño original.
+// Subir este número agranda al jugador SIN desproporcionarlo, porque todas
+// las partes se dibujan como múltiplos de esta misma escala, ancladas a los
+// pies (que siempre quedan fijos justo encima del césped).
+const ESCALA_AVATAR = 1.35;
 
 /**
  * Crea una partida independiente sobre un canvas dado.
@@ -323,22 +328,27 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
   function dibujarAvatar() {
     const baseX = balon.x;
     const baseY = lienzo.height - 8;
-    const inclina = animacionToque > 0 ? -6 : 0;
+    const inclina = (animacionToque > 0 ? -6 : 0) * ESCALA_AVATAR;
     if (animacionToque > 0) animacionToque--;
 
     contexto.save();
     contexto.strokeStyle = "#1a1a1a";
-    contexto.lineWidth = 6;
+    contexto.lineWidth = 6 * ESCALA_AVATAR;
     contexto.beginPath();
-    contexto.moveTo(baseX, baseY - 30);
-    contexto.lineTo(baseX - 8, baseY);
-    contexto.moveTo(baseX, baseY - 30);
-    contexto.lineTo(baseX + 8 + inclina, baseY + inclina);
+    contexto.moveTo(baseX, baseY - 30 * ESCALA_AVATAR);
+    contexto.lineTo(baseX - 8 * ESCALA_AVATAR, baseY);
+    contexto.moveTo(baseX, baseY - 30 * ESCALA_AVATAR);
+    contexto.lineTo(baseX + 8 * ESCALA_AVATAR + inclina, baseY + inclina);
     contexto.stroke();
     contexto.fillStyle = jugador.colorPrimario;
-    contexto.fillRect(baseX - 12, baseY - 55, 24, 28);
+    contexto.fillRect(
+      baseX - 12 * ESCALA_AVATAR,
+      baseY - 55 * ESCALA_AVATAR,
+      24 * ESCALA_AVATAR,
+      28 * ESCALA_AVATAR
+    );
     contexto.beginPath();
-    contexto.arc(baseX, baseY - 64, 10, 0, Math.PI * 2);
+    contexto.arc(baseX, baseY - 64 * ESCALA_AVATAR, 10 * ESCALA_AVATAR, 0, Math.PI * 2);
     contexto.fillStyle = jugador.colorPiel;
     contexto.fill();
     contexto.restore();

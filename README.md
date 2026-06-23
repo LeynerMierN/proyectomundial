@@ -73,7 +73,15 @@ Haaland 🇳🇴 · De Bruyne 🇧🇪 · Salah 🇪🇬 · Modrić 🇭🇷 · 
 proyectomundial/
 ├── index.html              # Estructura: las 4 pantallas del juego
 ├── css/
-│   └── styles.css          # Todos los estilos visuales
+│   ├── README.md            # Mapa rápido de qué hace cada archivo CSS
+│   ├── 01-variables.css     # Colores, fuente, reset
+│   ├── 02-layout.css        # Contenedor #app y sistema de pantallas
+│   ├── 03-componentes.css   # Títulos y botones reutilizables
+│   ├── 04-menu-inicio.css   # Decoración animada de la portada
+│   ├── 05-seleccion.css     # Tarjetas de avatar y selector de dificultad
+│   ├── 06-juego.css         # Juego 1P/2P + estadio y confeti compartidos
+│   ├── 07-fin.css           # Pantalla de Game Over
+│   └── 08-utilidades.css    # .oculto, accesibilidad y responsive
 ├── js/
 │   ├── data/
 │   │   ├── jugadores.js     # Datos de los 10 avatares (sin lógica)
@@ -95,6 +103,29 @@ cada función hace **una sola cosa bien** (`crearSvgAvatar`, `patearBalon`,
 `actualizarFisica`, `mostrarPantalla`, …).
 
 ---
+
+## 🎨 CSS dividido en 8 archivos (en vez de uno gigante)
+
+Antes había un único `css/styles.css` de **más de 800 líneas**. Se dividió en
+**8 archivos**, uno por responsabilidad (variables, layout, componentes, menú,
+selección, juego, fin, utilidades), para que cada parte se pueda **explicar
+por separado** y sea más rápido encontrar qué tocar. El detalle completo —
+incluyendo por qué el **orden de carga importa** (cascada de CSS) — está en
+[`css/README.md`](css/README.md). En resumen:
+
+| Archivo | Qué contiene |
+|---|---|
+| `01-variables.css` | Paleta de colores, fuente, reset básico |
+| `02-layout.css` | El "celular" `#app` y el sistema de pantallas |
+| `03-componentes.css` | Títulos y botones reutilizables en toda la app |
+| `04-menu-inicio.css` | Cancha animada, reflectores, balón que bota (portada) |
+| `05-seleccion.css` | Tarjetas de avatar y selector de dificultad |
+| `06-juego.css` | Juego 1 y 2 jugadores + estadio/confeti compartidos |
+| `07-fin.css` | Pantalla de Game Over |
+| `08-utilidades.css` | `.oculto`, accesibilidad y ajustes responsive |
+
+> Importante para quien edite el CSS: si dos archivos definen la misma clase,
+> **gana el que carga después** en `index.html`. Por eso están numerados.
 
 ## 🧠 Decisiones técnicas clave
 
@@ -136,7 +167,9 @@ la defensa. Ver `PRESENTACION.md` para el detalle del proceso y los prompts.
 - [x] Fondo de estadio y contador grande (inspirado en juego de referencia).
 - [x] Formato vertical (retrato, tipo celular).
 - [x] Modo 2 jugadores en pantalla dividida (local).
+- [x] Regla estricta de impacto (un fallo es game over inmediato).
+- [x] CSS dividido en 8 archivos por responsabilidad (antes un solo archivo
+      de 800+ líneas).
 - [ ] Mapa del mundo con **7 países**, cada uno con una actividad deportiva
       (USA → dominadas, Colombia → penaltis, Europa → cabezazos, etc.).
 - [ ] Tabla de puntuaciones por jugador.
-- [ ] Niveles de dificultad seleccionables.

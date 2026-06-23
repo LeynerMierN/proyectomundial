@@ -35,6 +35,7 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Menú deportivo animado (solo CSS) | Reflectores giratorios, cancha con franjas en movimiento, balón que rebota, título con brillo metálico y botones con glow. Respeta `prefers-reduced-motion`. |
 | Selección y fin también deportivos | Clase `.pantalla--estadio` (fondo compartido), tarjetas con entrada en cascada + glow + insignia ✓, puntaje con "pop", título con sacudida y **confeti** al lograr récord/ganar (clase `.celebrando`). |
 | Regla estricta de impacto (if/else sin escape) | Un clic fuera del balón, o espacio fuera de la zona de alcance, ya no se ignora: termina la partida de inmediato (`fallar()`). Antes un fallo simplemente no hacía nada y se podía "spamear" sin riesgo. |
+| **CSS segmentado en 8 archivos** | El `styles.css` único ya pasaba de 800 líneas y era difícil de explicar en la defensa o de revisar en equipo. Se partió por responsabilidad (variables, layout, componentes, menú, selección, juego, fin, utilidades), numerados `01`–`08` para que el número marque también el **orden de carga** (la cascada de CSS depende de ese orden). Detalle completo en [`css/README.md`](css/README.md). |
 
 ---
 
@@ -53,6 +54,33 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 - `main.js` → coordina pantallas, dificultad, sonido y ambos modos:
   `mostrarPantalla`, `seleccionarDificultad`, `comenzarPartida`,
   `comenzarRonda2P`, `mostrarResultado2P`, `alternarSonido`.
+
+### CSS (8 archivos, cargados en `index.html` en este orden exacto)
+
+1. `css/01-variables.css` → `:root` (colores, radio, fuente), reset, fondo
+   general con reflectores.
+2. `css/02-layout.css` → `#app` y el sistema de pantallas (`.pantalla`,
+   `.pantalla--activa`).
+3. `css/03-componentes.css` → títulos, subtítulos y botones reutilizables.
+4. `css/04-menu-inicio.css` → decoración animada SOLO de la portada (cancha,
+   reflectores, balón que bota, chip de récord).
+5. `css/05-seleccion.css` → tarjetas de avatar, selector de dificultad,
+   botón de sonido.
+6. `css/06-juego.css` → marcador/lienzo de 1 jugador, pantalla dividida de 2
+   jugadores, y el fondo de estadio + confeti que comparten selección/fin
+   (necesita cargar después de `05-seleccion.css` para ganarle la cascada en
+   las clases que se repiten, como `.tarjeta-avatar`).
+7. `css/07-fin.css` → pantalla de Game Over (puntaje, motivo, récord).
+8. `css/08-utilidades.css` → `.oculto`, `prefers-reduced-motion`, responsive.
+   Va al final a propósito: son los "ajustes finales" que deben poder
+   sobreescribir cualquier cosa anterior.
+
+> Mientras se dividía, se notó que `.tarjeta-avatar { position: relative }`
+> estaba declarado dos veces en el archivo original (una vez junto a la
+> insignia ✓ y otra vez suelta debajo). Se unificó en una sola regla dentro
+> de `06-juego.css` sin cambiar el resultado visual — es la única limpieza
+> que se hizo durante la segmentación, todo lo demás es el mismo CSS
+> reorganizado.
 
 ---
 
@@ -95,6 +123,8 @@ quedan las constantes que no dependen del nivel:
 - [x] Modo 2 jugadores en pantalla dividida (local) con ganador.
 - [x] Regla estricta de impacto: clic o espacio fuera de la zona = game over
       inmediato (verificado con pruebas de física deterministas, sin rAF).
+- [x] CSS segmentado en 8 archivos por responsabilidad (verificado: las 8
+      hojas cargan en orden y los estilos computados no cambiaron).
 - [ ] Mapa del mundo (fase 2).
 
 ---

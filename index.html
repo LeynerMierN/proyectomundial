@@ -76,7 +76,8 @@
         </header>
         <canvas id="lienzo-juego" class="lienzo"></canvas>
         <p class="ayuda-juego">
-          🖱️ Haz clic en el balón &nbsp;|&nbsp; ⌨️ o pulsa la barra espaciadora
+          🖱️ Clic certero en el balón &nbsp;|&nbsp; ⌨️ espacio solo cuando esté
+          a tu alcance. <strong>¡Un fallo es game over!</strong>
         </p>
       </section>
 
@@ -116,7 +117,9 @@
               <span class="campo-2p__puntaje" id="puntaje-p1">0</span>
             </div>
             <canvas id="lienzo-p1" class="lienzo lienzo--2p"></canvas>
-            <p class="campo-2p__tecla">Tecla <kbd>A</kbd> o clic</p>
+            <p class="campo-2p__tecla">
+              Tecla <kbd>A</kbd> o clic — ¡un fallo te saca!
+            </p>
           </div>
           <div class="campo-2p">
             <div class="campo-2p__cabecera campo-2p__cabecera--p2">
@@ -124,7 +127,9 @@
               <span class="campo-2p__puntaje" id="puntaje-p2">0</span>
             </div>
             <canvas id="lienzo-p2" class="lienzo lienzo--2p"></canvas>
-            <p class="campo-2p__tecla">Tecla <kbd>L</kbd> o clic</p>
+            <p class="campo-2p__tecla">
+              Tecla <kbd>L</kbd> o clic — ¡un fallo te saca!
+            </p>
           </div>
         </div>
       </section>
@@ -152,10 +157,13 @@
           <span></span><span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <h2 class="titulo-seccion titulo-fin">¡Se cayó el balón! 😵</h2>
+        <h2 class="titulo-seccion titulo-fin" id="titulo-fin">
+          ¡Se cayó el balón! 😵
+        </h2>
         <p class="resultado">
           Hiciste <span id="puntaje-final">0</span> dominadas.
         </p>
+        <p id="motivo-fin" class="motivo-fin">El balón tocó el suelo.</p>
         <p id="mensaje-record" class="mensaje-record oculto">
           🎉 ¡Nuevo récord!
         </p>

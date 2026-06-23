@@ -757,6 +757,11 @@ kbd {
   font-size: 1.3rem;
 }
 
+.motivo-fin {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
 /* Título del game over con una breve sacudida al aparecer. */
 .titulo-fin {
   animation: sacudir 0.5s ease;

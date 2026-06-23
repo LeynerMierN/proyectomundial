@@ -1,0 +1,124 @@
+/**
+ * css/04-menu-inicio.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 4 de 8 — Decoración deportiva de la pantalla de inicio (menú).
+ *
+ * Qué resuelve: todo lo puramente visual y animado que SOLO aparece en la
+ * pantalla de inicio (#pantalla-inicio), para que el menú se sienta como un
+ * estadio vivo: cancha que se desliza, reflectores, un balón que bota y el
+ * chip del récord. Nada de esto es interactivo (aria-hidden en el HTML).
+ *
+ * Contiene:
+ *   - .cancha-fondo   -> césped con franjas que se desplazan.
+ *   - .reflectores     -> halo de luz detrás del título.
+ *   - .balon-bote      -> balón que rebota y gira cerca del título.
+ *   - .chip-record     -> "pastilla" con el récord máximo.
+ *   - @media (prefers-reduced-motion) -> apaga estas animaciones si el
+ *     usuario lo prefiere (accesibilidad).
+ */
+
+/* Césped con franjas que se desplazan lentamente, en la mitad inferior. */
+.cancha-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 45%,
+      rgba(46, 139, 87, 0.35) 45%,
+      rgba(31, 107, 65, 0.5) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0 28px,
+      transparent 28px 56px
+    );
+  background-size: 100% 100%, 112px 100%;
+  animation: panear-cancha 6s linear infinite;
+}
+
+@keyframes panear-cancha {
+  to {
+    background-position: 0 0, 112px 0;
+  }
+}
+
+/* Halo de reflectores suave detrás del título. */
+.reflectores {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  width: 120%;
+  height: 70%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(120, 200, 255, 0.22),
+    transparent 60%
+  );
+  animation: latir-reflectores 4s ease-in-out infinite;
+}
+
+@keyframes latir-reflectores {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Balón que rebota cerca del título. */
+.balon-bote {
+  position: absolute;
+  top: 12%;
+  font-size: 2.6rem;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.4));
+  animation: botar 1.4s cubic-bezier(0.5, 0.05, 0.5, 1) infinite,
+    girar-balon 1.4s linear infinite;
+}
+
+@keyframes botar {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(0.9);
+  }
+  50% {
+    transform: translateY(-44px) scaleY(1.05);
+  }
+}
+
+@keyframes girar-balon {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Chip estilo "marcador" para el récord. */
+.chip-record {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 214, 10, 0.4);
+  font-size: 0.95rem;
+}
+
+.chip-record strong {
+  color: var(--color-acento);
+  font-size: 1.1rem;
+}
+
+/* Respeta a quien prefiere menos animación. */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .titulo,
+  .cancha-fondo,
+  .reflectores,
+  .balon-bote {
+    animation: none;
+  }
+}

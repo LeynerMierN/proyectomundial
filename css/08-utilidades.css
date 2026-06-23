@@ -1,0 +1,43 @@
+/**
+ * css/08-utilidades.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 8 de 8 — Utilidades y responsive.
+ *
+ * Por qué va último: contiene los "ajustes finales" que deben poder anular
+ * (sobreescribir) lo que sea necesario de los archivos anteriores: ocultar
+ * elementos, apagar animaciones por accesibilidad, y adaptar tamaños en
+ * pantallas pequeñas. Al cargar al final, gana los empates de la cascada.
+ *
+ * Contiene:
+ *   - .oculto                          -> clase genérica para esconder algo.
+ *   - @media (prefers-reduced-motion)   -> apaga animaciones si el usuario
+ *     del sistema operativo así lo configuró (accesibilidad).
+ *   - @media (max-width: 600px)         -> ajustes para pantallas angostas.
+ */
+
+.oculto {
+  display: none !important;
+}
+
+/* Quien prefiere menos movimiento: se apagan las animaciones decorativas. */
+@media (prefers-reduced-motion: reduce) {
+  .pantalla--estadio::before,
+  .tarjeta-avatar,
+  .tarjeta-avatar--activa,
+  .boton-dificultad--activa,
+  .confeti span,
+  .titulo-fin,
+  #puntaje-final,
+  .mensaje-record {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-avatares {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .titulo {
+    font-size: 2rem;
+  }
+}

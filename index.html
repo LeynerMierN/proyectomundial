@@ -4,7 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mundial de Dominadas ⚽</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <!--
+      El CSS está dividido en 8 archivos por responsabilidad (en vez de un
+      único archivo gigante) para que cada parte se pueda explicar por
+      separado. EL ORDEN IMPORTA: si dos archivos definen la misma clase con
+      la misma especificidad, gana el que carga DESPUÉS (cascada de CSS), así
+      que respeta este orden si agregas uno nuevo. Ver css/README.md para el
+      detalle de qué hace cada archivo.
+    -->
+    <link rel="stylesheet" href="css/01-variables.css" />
+    <link rel="stylesheet" href="css/02-layout.css" />
+    <link rel="stylesheet" href="css/03-componentes.css" />
+    <link rel="stylesheet" href="css/04-menu-inicio.css" />
+    <link rel="stylesheet" href="css/05-seleccion.css" />
+    <link rel="stylesheet" href="css/06-juego.css" />
+    <link rel="stylesheet" href="css/07-fin.css" />
+    <link rel="stylesheet" href="css/08-utilidades.css" />
   </head>
   <body>
     <!--

@@ -1,0 +1,66 @@
+/**
+ * css/02-layout.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 2 de 8 — Layout general y sistema de pantallas.
+ *
+ * Qué resuelve: el juego es UNA sola página HTML con varias <section
+ * class="pantalla">; JavaScript (main.js) le agrega/quita la clase
+ * `pantalla--activa` a una de ellas. Aquí vive la regla CSS que hace que
+ * "tener esa clase" sea lo único que decide qué se ve en pantalla.
+ *
+ * Contiene:
+ *   - #app                -> el "celular" contenedor de todo el juego.
+ *   - .pantalla            -> cada sección ocupa el contenedor completo.
+ *   - #pantalla-seleccion  -> ajuste fino: esa pantalla puede ser más alta.
+ *   - .pantalla--activa     -> la única visible, con una animación de entrada.
+ */
+
+#app {
+  /* Formato vertical tipo celular (retrato) */
+  width: min(430px, 96vw);
+  height: min(820px, 95vh);
+  position: relative;
+  z-index: 1;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(22, 50, 79, 0.7), rgba(10, 25, 41, 0.7));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+/* Cada pantalla ocupa todo el contenedor. Solo la activa se muestra. */
+.pantalla {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+  overflow-y: auto; /* permite scroll si el contenido no cabe (selección) */
+}
+
+/* La selección puede ser alta: se alinea arriba y se desplaza si hace falta. */
+#pantalla-seleccion {
+  justify-content: flex-start;
+  padding-top: 16px;
+  gap: 12px;
+}
+
+.pantalla--activa {
+  display: flex;
+  animation: aparecer 0.4s ease;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

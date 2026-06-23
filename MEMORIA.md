@@ -36,6 +36,9 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Selección y fin también deportivos | Clase `.pantalla--estadio` (fondo compartido), tarjetas con entrada en cascada + glow + insignia ✓, puntaje con "pop", título con sacudida y **confeti** al lograr récord/ganar (clase `.celebrando`). |
 | Regla estricta de impacto (if/else sin escape) | Un clic fuera del balón, o espacio fuera de la zona de alcance, ya no se ignora: termina la partida de inmediato (`fallar()`). Antes un fallo simplemente no hacía nada y se podía "spamear" sin riesgo. |
 | **CSS segmentado en 8 archivos** | El `styles.css` único ya pasaba de 800 líneas y era difícil de explicar en la defensa o de revisar en equipo. Se partió por responsabilidad (variables, layout, componentes, menú, selección, juego, fin, utilidades), numerados `01`–`08` para que el número marque también el **orden de carga** (la cascada de CSS depende de ese orden). Detalle completo en [`css/README.md`](css/README.md). |
+| "Sazón" como módulo separado de la física (`sazon.js`) | Se pidió integrar un mecanismo de mensajes de hinchada/hitos (inspirado en una propuesta externa con variables que no existían en este proyecto, como `ballTop` o `juegoActivo`). En vez de pegarlo tal cual, `crearPartida()` ganó un gancho opcional `alAnotar(info)` que solo REPORTA datos (puntaje, si fue un toque "raspando" el borde, el contenedor visual, y una función `pausar`); toda la personalidad (textos, cuándo mostrarlos) vive en `sazon.js`, que no toca física ni canvas. Así el motor se mantiene neutral y la "sazón" se puede cambiar de tono sin riesgo de romper el juego. |
+| Himno sintetizado (no audio remoto) | La propuesta original cargaba un sonido desde una URL de Google. Eso rompería el "100% offline" que ya promete el README y agrega una dependencia de red innecesaria. Se reemplazó por `Sonidos.himno()`, un arpegio generado con la misma Web Audio API que ya usábamos. |
+| Sin "victoria a las 21 dominadas" | La propuesta original mantenía esa regla de un diseño distinto (puntaje con tope). Nuestro juego es de **puntaje infinito** (compites contra tu récord), así que esa regla no aplicaba y no se portó. |
 
 ---
 
@@ -47,15 +50,49 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 - `sonidos.js` → módulo `Sonidos` (Web Audio): `toque`, `record`, `gameOver`,
   `boton`, `alternarMute`.
 - `avatares.js` → `crearSvgAvatar`, `construirPantallaSeleccion`.
+- `sazon.js` → módulo `Sazon`: `alAnotar(info)` decide elogios, sustos,
+  el despiste de las 10 dominadas y el himno de las 100. No toca física.
 - `juego.js` → `crearPartida()` (fábrica reutilizable con física + dibujo,
-  incluye `tocarEn`/`tocarCentro`/`fallar` para la regla estricta de impacto)
-  y el controlador `Juego` del modo 1 jugador.
+  incluye `tocarEn`/`tocarCentro`/`fallar` para la regla estricta de impacto,
+  y `pausar()`/el gancho `opciones.alAnotar` que usa `sazon.js`) y el
+  controlador `Juego` del modo 1 jugador.
 - `dosjugadores.js` → `Juego2P`: dos partidas a la vez en pantalla dividida.
 - `main.js` → coordina pantallas, dificultad, sonido y ambos modos:
   `mostrarPantalla`, `seleccionarDificultad`, `comenzarPartida`,
   `comenzarRonda2P`, `mostrarResultado2P`, `alternarSonido`.
 
-### CSS (8 archivos, cargados en `index.html` en este orden exacto)
+### Cómo se conecta "sazón" al motor (para no acoplar personalidad y física)
+
+`crearPartida(lienzo, jugador, dificultad, opciones)` recibe un 4to parámetro
+opcional. Si `opciones.alAnotar` existe, se llama **cada vez que se acierta un
+toque** con:
+```js
+{ puntaje, jugador, fueRasguno, contenedor, pausar }
+```
+- `fueRasguno`: true si el toque acertó pero raspando el borde de la zona
+  válida (en clic: la distancia quedó en el 20% más externo del margen
+  permitido; en teclado: el balón estaba en el 20% más cercano al límite real
+  de derrota). Se compara contra ese 20% proporcional y NO contra un número
+  fijo de píxeles porque, cerca del suelo, el balón avanza varios píxeles por
+  fotograma — un margen fijo pequeño (se probó con 4px) podía "saltarse"
+  entre un fotograma y el siguiente y nunca detectarse. Esto se encontró y
+  corrigió mientras se probaba la integración (ver pruebas más abajo).
+- `contenedor`: el elemento HTML donde mostrar el mensaje — `crearPartida()`
+  lo calcula solo (`lienzo.closest(".campo-2p, .pantalla")`), así que en 2
+  jugadores cada partida apunta a SU mitad de la pantalla, no a la pantalla
+  completa.
+- `pausar(ms, impulso)`: congela esa partida (sin terminarla) por `ms`
+  milisegundos; al volver, le da al balón la velocidad vertical `impulso`.
+  Mientras está pausada, ningún clic/tecla cuenta ni a favor ni en contra
+  (se verificó: 200 fotogramas en pausa no la matan, y un toque "fallido"
+  durante la pausa se ignora en vez de terminar la partida).
+
+`Juego.iniciar()` y `Juego2P.iniciar()` simplemente pasan
+`{ alAnotar: Sazon.alAnotar }` al crear cada partida — si en el futuro se
+quita o cambia `sazon.js`, el motor sigue funcionando exactamente igual sin
+tocar una línea de `juego.js`.
+
+### CSS (9 archivos, cargados en `index.html` en este orden exacto)
 
 1. `css/01-variables.css` → `:root` (colores, radio, fuente), reset, fondo
    general con reflectores.
@@ -74,6 +111,9 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 8. `css/08-utilidades.css` → `.oculto`, `prefers-reduced-motion`, responsive.
    Va al final a propósito: son los "ajustes finales" que deben poder
    sobreescribir cualquier cosa anterior.
+9. `css/09-sazon.css` → estilo del texto flotante de `sazon.js`. Se agregó
+   `position: relative` a `.campo-2p` (en `06-juego.css`) para que ese texto
+   quede confinado a la mitad del jugador correspondiente en modo 2P.
 
 > Mientras se dividía, se notó que `.tarjeta-avatar { position: relative }`
 > estaba declarado dos veces en el archivo original (una vez junto a la
@@ -123,8 +163,13 @@ quedan las constantes que no dependen del nivel:
 - [x] Modo 2 jugadores en pantalla dividida (local) con ganador.
 - [x] Regla estricta de impacto: clic o espacio fuera de la zona = game over
       inmediato (verificado con pruebas de física deterministas, sin rAF).
-- [x] CSS segmentado en 8 archivos por responsabilidad (verificado: las 8
+- [x] CSS segmentado en 9 archivos por responsabilidad (verificado: las 9
       hojas cargan en orden y los estilos computados no cambiaron).
+- [x] "Sazón" (elogios, sustos, despiste a las 10, himno a las 100) integrada
+      vía un gancho `alAnotar` que no acopla personalidad con física.
+      Verificado con pruebas deterministas: evento se dispara con la forma
+      correcta, las 4 ramas de `Sazon.alAnotar` se probaron por separado, y
+      `pausar()` realmente congela e ignora toques durante la pausa.
 - [ ] Mapa del mundo (fase 2).
 
 ---

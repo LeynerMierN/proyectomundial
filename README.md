@@ -81,13 +81,15 @@ proyectomundial/
 │   ├── 05-seleccion.css     # Tarjetas de avatar y selector de dificultad
 │   ├── 06-juego.css         # Juego 1P/2P + estadio y confeti compartidos
 │   ├── 07-fin.css           # Pantalla de Game Over
-│   └── 08-utilidades.css    # .oculto, accesibilidad y responsive
+│   ├── 08-utilidades.css    # .oculto, accesibilidad y responsive
+│   └── 09-sazon.css         # Texto flotante de "sazón" (elogios/sustos/hitos)
 ├── js/
 │   ├── data/
 │   │   ├── jugadores.js     # Datos de los 10 avatares (sin lógica)
 │   │   └── dificultades.js  # Parámetros de los 3 niveles de dificultad
 │   ├── utils.js            # Funciones de utilidad (localStorage, mates)
 │   ├── sonidos.js          # Efectos de sonido (Web Audio API, sin archivos)
+│   ├── sazon.js            # "Sazón" costeña: elogios, sustos, hitos (8/10/100)
 │   ├── avatares.js         # Genera los SVG y la pantalla de selección
 │   ├── juego.js            # Motor: crearPartida() + modo 1 jugador
 │   ├── dosjugadores.js     # Modo 2 jugadores (pantalla dividida)
@@ -104,14 +106,36 @@ cada función hace **una sola cosa bien** (`crearSvgAvatar`, `patearBalon`,
 
 ---
 
-## 🎨 CSS dividido en 8 archivos (en vez de uno gigante)
+## 🌶️ "Sazón": la hinchada que comenta la partida
+
+Mientras juegas, una "voz" costeña reacciona a tus dominadas (`js/sazon.js`):
+
+- 🎉 **Elogio cada 8 dominadas** — un mensaje al azar tipo "¡Monstruo!" o
+  "¡Erda, perfecto!".
+- 😅 **Susto si "raspas" el toque** — si acertaste pero muy al límite (a punto
+  de fallar), aparece un aviso en rojo como "¡Anda, casi la embarras!".
+- 😵 **Despiste a las 10 dominadas** — el juego se congela un instante con
+  "¿¡CÓMO TE DIGO!?" y al volver te devuelve el balón con un impulso sorpresa.
+- 🏆 **Himno al llegar a 100** — un pequeño arpegio triunfal y el aviso
+  "¡MODO CHAMPIONS LEAGUE!".
+
+Funciona igual en 1 y 2 jugadores: cada partida tiene su propio mensaje, así
+que en 2 jugadores cada quien ve el suyo solo sobre SU mitad de la pantalla.
+
+> **Dos decisiones al integrarlo:** (1) el himno se **sintetiza** con la
+> misma Web Audio API que el resto de sonidos, en vez de descargar un audio
+> de internet — así el juego sigue funcionando 100% offline. (2) no se portó
+> la regla de "ganar a las 21 dominadas": nuestro juego es de puntaje
+> infinito (compites contra tu récord), así que ese límite no aplicaba.
+
+## 🎨 CSS dividido en 9 archivos (en vez de uno gigante)
 
 Antes había un único `css/styles.css` de **más de 800 líneas**. Se dividió en
-**8 archivos**, uno por responsabilidad (variables, layout, componentes, menú,
-selección, juego, fin, utilidades), para que cada parte se pueda **explicar
-por separado** y sea más rápido encontrar qué tocar. El detalle completo —
-incluyendo por qué el **orden de carga importa** (cascada de CSS) — está en
-[`css/README.md`](css/README.md). En resumen:
+**9 archivos**, uno por responsabilidad (variables, layout, componentes, menú,
+selección, juego, fin, utilidades, sazón), para que cada parte se pueda
+**explicar por separado** y sea más rápido encontrar qué tocar. El detalle
+completo — incluyendo por qué el **orden de carga importa** (cascada de CSS) —
+está en [`css/README.md`](css/README.md). En resumen:
 
 | Archivo | Qué contiene |
 |---|---|
@@ -123,6 +147,7 @@ incluyendo por qué el **orden de carga importa** (cascada de CSS) — está en
 | `06-juego.css` | Juego 1 y 2 jugadores + estadio/confeti compartidos |
 | `07-fin.css` | Pantalla de Game Over |
 | `08-utilidades.css` | `.oculto`, accesibilidad y ajustes responsive |
+| `09-sazon.css` | Texto flotante de elogios/sustos/hitos (`js/sazon.js`) |
 
 > Importante para quien edite el CSS: si dos archivos definen la misma clase,
 > **gana el que carga después** en `index.html`. Por eso están numerados.
@@ -168,8 +193,9 @@ la defensa. Ver `PRESENTACION.md` para el detalle del proceso y los prompts.
 - [x] Formato vertical (retrato, tipo celular).
 - [x] Modo 2 jugadores en pantalla dividida (local).
 - [x] Regla estricta de impacto (un fallo es game over inmediato).
-- [x] CSS dividido en 8 archivos por responsabilidad (antes un solo archivo
+- [x] CSS dividido en 9 archivos por responsabilidad (antes un solo archivo
       de 800+ líneas).
+- [x] "Sazón": elogios, sustos, despiste a las 10 y himno a las 100 dominadas.
 - [ ] Mapa del mundo con **7 países**, cada uno con una actividad deportiva
       (USA → dominadas, Colombia → penaltis, Europa → cabezazos, etc.).
 - [ ] Tabla de puntuaciones por jugador.

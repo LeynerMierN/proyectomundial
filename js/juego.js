@@ -97,7 +97,20 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     lienzo.height = lienzo.clientHeight || 480;
     reiniciarBalon();
   }
+// --- Sistema de Presión Psicológica ---
+let mensajePresion = "";
+let tiempoMensaje = 0;
 
+const frasesDePresion = [
+  "¡No parpadees o se acabó!",
+  "¡Toda la tribuna te está abucheando!",
+  "¡Un error más y vas a la banca!",
+  "¡La presión te está asfixiando!",
+  "¡Falla esto y serás el meme del año!",
+  "¡¿Esa es tu definición de crack?!",
+  "¡El director técnico está furioso!",
+  "¡El mundo entero te está mirando!"
+];
   /** Coloca el balón arriba con un leve desvío horizontal. */
   function reiniciarBalon() {
     balon = {

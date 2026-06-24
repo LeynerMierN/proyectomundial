@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guía de Estudio — Mundial de Dominadas ⚽</title>
+<!--
+  GUÍA DE ESTUDIO VISUAL (archivo independiente, 100% offline).
+  Ábrela con doble clic. Sirve para que tú y tu compañero entiendan CADA
+  función, HTML y CSS del proyecto, y para preparar la defensa ante el profesor.
+  No forma parte del juego: es material de apoyo.
+-->
+<style>
+  :root {
+    --fondo: #0b1226;
+    --fondo2: #131d3b;
+    --tarjeta: #18244a;
+    --tarjeta2: #1f2d57;
+    --borde: #2c3c6e;
+    --texto: #e8edf9;
+    --tenue: #9fb0d6;
+    --acento: #ffd23f;     /* amarillo balón */
+    --verde: #36c46b;      /* césped */
+    --azul: #4ea3ff;
+    --rojo: #ff5c6c;
+    --morado: #b98bff;
+    --radio: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #1c2c5a 0%, var(--fondo) 60%);
+    color: var(--texto);
+    line-height: 1.6;
+  }
+  header.hero {
+    text-align: center;
+    padding: 48px 20px 28px;
+    border-bottom: 1px solid var(--borde);
+  }
+  header.hero .balon { font-size: 54px; display:block; animation: bote 1.6s ease-in-out infinite; }
+  @keyframes bote { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-12px);} }
+  header.hero h1 { font-size: clamp(28px, 5vw, 46px); margin: 6px 0 4px; }
+  header.hero h1 span { color: var(--acento); }
+  header.hero p { color: var(--tenue); margin: 0 auto; max-width: 640px; }
+
+  nav.tabs {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    padding: 12px; background: rgba(11,18,38,0.92);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--borde);
+  }
+  nav.tabs a {
+    color: var(--texto); text-decoration: none; font-size: 14px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--borde);
+    background: var(--tarjeta); transition: .15s;
+  }
+  nav.tabs a:hover { background: var(--tarjeta2); border-color: var(--acento); }
+
+  main { max-width: 980px; margin: 0 auto; padding: 28px 18px 80px; }
+  section { margin: 44px 0; scroll-margin-top: 70px; }
+  h2.seccion {
+    font-size: 26px; border-left: 5px solid var(--acento);
+    padding-left: 12px; margin-bottom: 4px;
+  }
+  h2.seccion small { display:block; font-size: 13px; color: var(--tenue); font-weight: 400; padding-top:4px;}
+  h3 { color: var(--acento); margin: 26px 0 8px; }
+
+  .card {
+    background: linear-gradient(180deg, var(--tarjeta) 0%, var(--fondo2) 100%);
+    border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 18px 20px; margin: 14px 0;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+
+  /* Rúbrica */
+  .rubrica .fila { margin: 12px 0; }
+  .rubrica .top { display:flex; justify-content: space-between; font-weight:600; margin-bottom:4px; }
+  .rubrica .peso { color: var(--acento); }
+  .barra { height: 12px; background: #0e1733; border-radius: 999px; overflow: hidden; border:1px solid var(--borde);}
+  .barra > div { height: 100%; background: linear-gradient(90deg, var(--verde), var(--acento)); }
+  .rubrica .nota { font-size: 13px; color: var(--tenue); margin-top: 4px; }
+
+  /* Flujo de archivos / capas */
+  .capa { display:flex; align-items:center; gap:14px; padding:12px 14px; border-radius: 10px; margin:10px 0; border:1px solid var(--borde); background: var(--tarjeta); }
+  .capa .num { flex:0 0 38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:800; background: var(--acento); color:#1a1a1a; }
+  .capa .txt b { color: var(--azul); }
+  .capa .txt small { color: var(--tenue); }
+
+  /* Diagrama flujo de pantallas */
+  .flujo { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .pant { background: var(--tarjeta2); border:1px solid var(--borde); border-radius:10px; padding:8px 12px; font-weight:600; font-size:14px; }
+  .flecha { color: var(--acento); font-weight:800; }
+
+  /* Bucle */
+  .bucle { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; }
+  .paso { background: var(--tarjeta); border:1px solid var(--borde); border-radius:10px; padding:10px 14px; text-align:center; min-width:130px; }
+  .paso b { color: var(--verde); }
+
+  /* Detalle de funciones */
+  details.fn { background: var(--tarjeta); border:1px solid var(--borde); border-radius:10px; margin:8px 0; overflow:hidden; }
+  details.fn > summary { cursor:pointer; padding:12px 16px; font-weight:600; list-style:none; display:flex; align-items:center; gap:10px; }
+  details.fn > summary::-webkit-details-marker { display:none; }
+  details.fn > summary:hover { background: var(--tarjeta2); }
+  details.fn[open] > summary { border-bottom:1px solid var(--borde); background: var(--tarjeta2); }
+  details.fn .cuerpo { padding: 12px 16px 16px; }
+  .codigo { font-family: "Consolas", monospace; background:#0c1430; color:var(--acento); padding:2px 7px; border-radius:6px; font-size:13px; }
+  .etiqueta { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:auto; }
+  .e-datos { background:#2a3a18; color:#bce86a; }
+  .e-util { background:#16304a; color:#7fc4ff; }
+  .e-motor { background:#3a2030; color:#ff9bb0; }
+  .e-ui { background:#2e2350; color:#cdaaff; }
+  .e-sonido { background:#3a3410; color:#ffe27a; }
+  .que { margin:6px 0; }
+  .porque { color: var(--tenue); }
+  .key { color: var(--azul); font-weight:600; }
+
+  /* Conceptos */
+  .concepto { border-left:4px solid var(--morado); padding-left:14px; margin:18px 0; }
+  .concepto h4 { margin:0 0 4px; color:var(--morado); }
+
+  /* Preguntas defensa */
+  .qa { background: var(--tarjeta); border:1px solid var(--borde); border-radius:10px; padding:14px 18px; margin:10px 0; }
+  .qa .p { color: var(--acento); font-weight:700; }
+  .qa .r { margin-top:6px; }
+
+  footer { text-align:center; color:var(--tenue); font-size:13px; padding:30px 20px; border-top:1px solid var(--borde); }
+  a.link { color: var(--azul); }
+  .pill { display:inline-block; font-size:12px; background:var(--tarjeta2); border:1px solid var(--borde); border-radius:999px; padding:2px 10px; margin:2px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="balon">⚽</span>
+  <h1>Guía de Estudio — <span>Mundial de Dominadas</span></h1>
+  <p>Todo el proyecto explicado pieza por pieza, para que tú y tu compañero puedan
+     <strong>defender cada línea</strong> ante el profesor. Esto NO es el juego: es tu chuleta de estudio.</p>
+</header>
+
+<nav class="tabs">
+  <a href="#rubrica">📊 Cómo te evalúan</a>
+  <a href="#mapa">🗂️ Mapa del proyecto</a>
+  <a href="#pantallas">🖥️ Flujo de pantallas</a>
+  <a href="#bucle">🔁 El bucle del juego</a>
+  <a href="#funciones">🔧 Función por función</a>
+  <a href="#conceptos">💡 Conceptos clave</a>
+  <a href="#defensa">🎤 Preguntas de defensa</a>
+</nav>
+
+<main>
+
+<!-- ====================== RÚBRICA ====================== -->
+<section id="rubrica">
+  <h2 class="seccion">📊 Cómo te evalúan
+    <small>Los 5 criterios del PDF del profesor. Memoriza esto: te dice DÓNDE están tus puntos.</small>
+  </h2>
+  <div class="card rubrica">
+    <div class="fila">
+      <div class="top"><span>3. Uso de Funciones y Modularidad</span><span class="peso">25%</span></div>
+      <div class="barra"><div style="width:100%"></div></div>
+      <div class="nota">El criterio que más vale. Por eso el código está partido en funciones pequeñas que hacen UNA cosa (<span class="codigo">dibujarBalon()</span>, <span class="codigo">patear()</span>, <span class="codigo">mostrarPantalla()</span>) y en módulos por archivo.</div>
+    </div>
+    <div class="fila">
+      <div class="top"><span>2. Pulcritud del Código (DRY)</span><span class="peso">20%</span></div>
+      <div class="barra"><div style="width:80%"></div></div>
+      <div class="nota">Nombres descriptivos en español, indentación, comentarios donde la lógica es compleja, y nada de código repetido (ej. <span class="codigo">buscar()</span> evita repetir <span class="codigo">document.querySelector</span>).</div>
+    </div>
+    <div class="fila">
+      <div class="top"><span>4. División por Pasos y Lógica</span><span class="peso">20%</span></div>
+      <div class="barra"><div style="width:80%"></div></div>
+      <div class="nota">Bucles, condicionales y <em>event listeners</em>. Descompusimos "hacer un juego" en problemas chiquitos.</div>
+    </div>
+    <div class="fila">
+      <div class="top"><span>5. Defensa y Comprensión</span><span class="peso">20%</span></div>
+      <div class="barra"><div style="width:80%"></div></div>
+      <div class="nota">⚠️ <strong>Regla de oro del profe:</strong> "deben poder explicar cada línea". Aquí entran los <em>commits</em> de Git y los prompts de IA. Esta guía existe sobre todo para este punto.</div>
+    </div>
+    <div class="fila">
+      <div class="top"><span>1. Orden de Carpetas y Archivos</span><span class="peso">15%</span></div>
+      <div class="barra"><div style="width:60%"></div></div>
+      <div class="nota">Estructura <span class="codigo">index.html</span> + <span class="codigo">/css</span> + <span class="codigo">/js</span> + <span class="codigo">/assets</span>. Separación lógica de responsabilidades.</div>
+    </div>
+  </div>
+  <div class="card">
+    <strong>📌 Frase para abrir la defensa:</strong> «Decidimos que <em>lo importante no era el juego más grande, sino el mejor estructurado y comprendido</em> — justo lo que pide el enunciado. Por eso cada archivo tiene una sola responsabilidad y cada función hace una sola cosa.»
+  </div>
+</section>
+
+<!-- ====================== MAPA ====================== -->
+<section id="mapa">
+  <h2 class="seccion">🗂️ Mapa del proyecto
+    <small>Qué hace cada archivo y por qué se cargan en este orden.</small>
+  </h2>
+
+  <h3>El orden de carga (de abajo en index.html)</h3>
+  <p class="porque">Los <span class="codigo">&lt;script&gt;</span> se cargan de arriba hacia abajo. Primero lo que no depende de nada (datos), luego lo que usa esos datos, y al final <span class="codigo">main.js</span> que enciende todo.</p>
+
+  <div class="capa"><div class="num">1</div><div class="txt"><b>js/data/jugadores.js</b> y <b>dificultades.js</b><br><small>Solo DATOS (los 10 futbolistas y los 3 niveles). Sin lógica. Son la "materia prima".</small></div></div>
+  <div class="capa"><div class="num">2</div><div class="txt"><b>js/utils.js</b><br><small>Herramientas genéricas: atajo del DOM, récord en memoria, matemáticas (Pitágoras).</small></div></div>
+  <div class="capa"><div class="num">3</div><div class="txt"><b>js/sonidos.js</b> · <b>sazon.js</b> · <b>avatares.js</b><br><small>Módulos de apoyo: sonido sintetizado, mensajes de hinchada, y dibujo de avatares.</small></div></div>
+  <div class="capa"><div class="num">4</div><div class="txt"><b>js/juego.js</b><br><small>El CORAZÓN: la fábrica <span class="codigo">crearPartida()</span> (física + dibujo) y el modo 1 jugador.</small></div></div>
+  <div class="capa"><div class="num">5</div><div class="txt"><b>js/dosjugadores.js</b><br><small>El modo 2 jugadores, que REUTILIZA la misma fábrica de juego.js.</small></div></div>
+  <div class="capa"><div class="num">6</div><div class="txt"><b>js/main.js</b><br><small>El "director de orquesta": conecta botones, cambia de pantalla, arranca partidas.</small></div></div>
+
+  <h3>El CSS: 9 archivos por responsabilidad</h3>
+  <p class="porque">Antes era un solo archivo de 800+ líneas. Se partió en 9 (numerados 01–09). <strong>El número es el orden de carga</strong>: si dos archivos chocan en la misma clase, gana el que carga después (cascada de CSS).</p>
+  <div class="grid">
+    <div class="card"><span class="pill">01</span> <b>variables</b> — colores, fuente, reset.</div>
+    <div class="card"><span class="pill">02</span> <b>layout</b> — el "celular" <span class="codigo">#app</span> y las pantallas.</div>
+    <div class="card"><span class="pill">03</span> <b>componentes</b> — títulos y botones reutilizables.</div>
+    <div class="card"><span class="pill">04</span> <b>menu-inicio</b> — portada animada (cancha, balón que bota).</div>
+    <div class="card"><span class="pill">05</span> <b>seleccion</b> — tarjetas de avatar y dificultad.</div>
+    <div class="card"><span class="pill">06</span> <b>juego</b> — marcador, lienzo, pantalla dividida 2P.</div>
+    <div class="card"><span class="pill">07</span> <b>fin</b> — pantalla de Game Over.</div>
+    <div class="card"><span class="pill">08</span> <b>utilidades</b> — <span class="codigo">.oculto</span>, accesibilidad, responsive.</div>
+    <div class="card"><span class="pill">09</span> <b>sazon</b> — el texto flotante de los mensajes.</div>
+  </div>
+</section>
+
+<!-- ====================== PANTALLAS ====================== -->
+<section id="pantallas">
+  <h2 class="seccion">🖥️ Flujo de pantallas
+    <small>Una sola página HTML. JavaScript muestra/oculta secciones con la clase <span class="codigo">pantalla--activa</span>. Nunca se recarga la página.</small>
+  </h2>
+  <div class="card">
+    <p><strong>Modo 1 jugador:</strong></p>
+    <div class="flujo">
+      <span class="pant">🏠 Inicio</span><span class="flecha">→</span>
+      <span class="pant">👤 Elegir crack</span><span class="flecha">→</span>
+      <span class="pant">⚽ Juego</span><span class="flecha">→</span>
+      <span class="pant">🏁 Game Over</span>
+    </div>
+    <p style="margin-top:18px"><strong>Modo 2 jugadores:</strong></p>
+    <div class="flujo">
+      <span class="pant">🏠 Inicio</span><span class="flecha">→</span>
+      <span class="pant">⚙️ Configurar 2P</span><span class="flecha">→</span>
+      <span class="pant">⚽⚽ Pantalla dividida</span><span class="flecha">→</span>
+      <span class="pant">🏆 Resultado</span>
+    </div>
+    <p class="porque" style="margin-top:18px">La función que hace la magia es <span class="codigo">mostrarPantalla(id)</span> en <b>main.js</b>: le quita la clase activa a todas las secciones y se la pone solo a la que pides. Eso es todo el "cambio de pantalla".</p>
+  </div>
+</section>
+
+<!-- ====================== BUCLE ====================== -->
+<section id="bucle">
+  <h2 class="seccion">🔁 El bucle del juego (lo más importante de entender)
+    <small>Un videojuego es un dibujo que se repinta ~60 veces por segundo. Eso es el "game loop".</small>
+  </h2>
+  <div class="card">
+    <div class="bucle">
+      <div class="paso"><b>1. actualizar()</b><br><small>mueve el balón (gravedad), revisa choques y si tocó el suelo</small></div>
+      <span class="flecha">→</span>
+      <div class="paso"><b>2. dibujar()</b><br><small>repinta cielo, gradas, césped, sombra, balón y avatar</small></div>
+      <span class="flecha">→</span>
+      <div class="paso"><b>3. requestAnimationFrame</b><br><small>el navegador llama de nuevo al bucle (~60 fps)</small></div>
+      <span class="flecha" style="font-size:22px">↺</span>
+    </div>
+    <p class="porque" style="margin-top:16px">Cuando <span class="codigo">actualizar()</span> devuelve <span class="key">false</span> (el balón cayó o hubo falta), el bucle NO se vuelve a pedir: en su lugar se llama <span class="codigo">terminarPartida()</span> → suena el efecto, se guarda el récord y se muestra el Game Over. Ese es el <strong>sistema de derrota</strong> que pide la rúbrica.</p>
+  </div>
+  <div class="card">
+    <h4 style="color:var(--azul); margin-top:0">¿Cómo se mueve el balón? (física simple)</h4>
+    <p>Cada fotograma: la velocidad vertical aumenta por la <span class="key">gravedad</span> (<span class="codigo">balon.vy += gravedad</span>), y la posición cambia según la velocidad (<span class="codigo">balon.y += balon.vy</span>). Al tocarlo, se le da un impulso hacia arriba (<span class="codigo">balon.vy = fuerzaToque</span>, un número negativo = sube). Es posición + velocidad + aceleración: la misma física de la vida real, simplificada.</p>
+  </div>
+</section>
+
+<!-- ====================== FUNCIONES ====================== -->
+<section id="funciones">
+  <h2 class="seccion">🔧 Función por función
+    <small>Haz clic en cada una para ver QUÉ hace y POR QUÉ existe. Agrupadas por archivo.</small>
+  </h2>
+
+  <h3>📦 Datos &nbsp;<span class="etiqueta e-datos">solo datos</span></h3>
+  <details class="fn"><summary>JUGADORES <span class="etiqueta e-datos">jugadores.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> un arreglo con los 10 futbolistas. Cada uno es un objeto: <span class="codigo">id, nombre, pais, bandera, dorsal, colores, control, frase</span> y un <span class="codigo">foto</span> opcional.</p>
+    <p class="porque"><b>Por qué:</b> separar los datos de la lógica. Para agregar un jugador 11 solo añades un objeto aquí, sin tocar el motor del juego.</p></div>
+  </details>
+  <details class="fn"><summary>DIFICULTADES · buscarDificultadPorId() <span class="etiqueta e-datos">dificultades.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> los 3 niveles (Fácil/Normal/Difícil) con sus parámetros de física: <span class="codigo">gravedadInicial, gravedadMaxima, incremento, fuerzaToque, toleranciaExtra</span>. La función busca un nivel por su id.</p>
+    <p class="porque"><b>Por qué:</b> el "balance" del juego son datos, no código. Si un nivel se siente injusto, cambias un número aquí y listo.</p></div>
+  </details>
+
+  <h3>🧰 Utilidades &nbsp;<span class="etiqueta e-util">genérico</span></h3>
+  <details class="fn"><summary>buscar(selector) <span class="etiqueta e-util">utils.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> atajo de <span class="codigo">document.querySelector</span>.</p>
+    <p class="porque"><b>Por qué (DRY):</b> escribir <span class="codigo">buscar("#btn")</span> en vez de <span class="codigo">document.querySelector("#btn")</span> decenas de veces. Menos repetición = punto de pulcritud.</p></div>
+  </details>
+  <details class="fn"><summary>leerRecord() · guardarRecordSiEsMayor() <span class="etiqueta e-util">utils.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> leen y guardan el récord en <span class="codigo">localStorage</span> (la memoria del navegador). El guardado solo escribe si el nuevo puntaje supera al anterior y devuelve <span class="key">true</span> si hubo récord nuevo.</p>
+    <p class="porque"><b>Por qué:</b> persistencia sin servidor. El récord sigue ahí aunque cierres el navegador.</p></div>
+  </details>
+  <details class="fn"><summary>limitar(valor, min, max) <span class="etiqueta e-util">utils.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> "aprisiona" un número en un rango. Si te pasas del máximo, devuelve el máximo.</p>
+    <p class="porque"><b>Por qué:</b> que la velocidad o la posición del balón no se disparen a valores locos. También limita la gravedad a su tope.</p></div>
+  </details>
+  <details class="fn"><summary>distancia(x1,y1,x2,y2) <span class="etiqueta e-util">utils.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> distancia entre dos puntos con el <strong>teorema de Pitágoras</strong> (<span class="codigo">√(dx² + dy²)</span>).</p>
+    <p class="porque"><b>Por qué:</b> para saber si un clic cayó sobre el balón: si la distancia del clic al centro del balón es menor que el radio + tolerancia, ¡acertaste!</p></div>
+  </details>
+
+  <h3>🔊 Sonidos &nbsp;<span class="etiqueta e-sonido">Web Audio</span></h3>
+  <details class="fn"><summary>tono(frecuencia, duracion, tipo, volumen) <span class="etiqueta e-sonido">sonidos.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> crea un sonido desde cero: un oscilador (la nota) + una ganancia (el volumen, con un "fade out" para que no corte feo).</p>
+    <p class="porque"><b>Por qué:</b> NO usamos archivos .mp3. Todo se sintetiza con la <strong>Web Audio API</strong>, así el juego pesa menos y funciona 100% offline.</p></div>
+  </details>
+  <details class="fn"><summary>toque() · gameOver() · fallo() · record() · himno() · boton() <span class="etiqueta e-sonido">sonidos.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> cada uno arma su efecto llamando a <span class="codigo">tono()</span>. <span class="codigo">toque()</span> sube de tono con el combo; <span class="codigo">gameOver()</span> baja; <span class="codigo">himno()</span> es un arpegio para las 100 dominadas.</p>
+    <p class="porque"><b>Por qué:</b> retroalimentación. El oído te dice qué pasó sin mirar la pantalla.</p></div>
+  </details>
+  <details class="fn"><summary>obtenerContexto() · alternarMute() <span class="etiqueta e-sonido">sonidos.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> crea el <span class="codigo">AudioContext</span> la primera vez que se necesita (los navegadores lo exigen tras un clic del usuario), y el botón 🔊/🔇 activa o silencia todo.</p></div>
+  </details>
+
+  <h3>🌶️ Sazón &nbsp;<span class="etiqueta e-ui">personalidad</span></h3>
+  <details class="fn"><summary>alAnotar(info) · mostrarTextoFlotante() · alAzar() <span class="etiqueta e-ui">sazon.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> <span class="codigo">alAnotar()</span> se llama en cada toque acertado y decide qué mensaje mostrar: susto si raspaste el borde, elogio cada 8, despiste a las 10, himno a las 100.</p>
+    <p class="porque"><b>Por qué separado:</b> la "personalidad" no se mezcla con la física. <b>juego.js</b> solo REPORTA ("se anotó un toque"); <b>sazon.js</b> decide la reacción. Puedes borrar este archivo y el juego sigue funcionando igual.</p></div>
+  </details>
+
+  <h3>🎨 Avatares &nbsp;<span class="etiqueta e-ui">UI</span></h3>
+  <details class="fn"><summary>crearSvgAvatar(jugador) <span class="etiqueta e-ui">avatares.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> devuelve el dibujo SVG de un futbolista (cabeza, camiseta a dos colores, dorsal) usando SUS colores.</p>
+    <p class="porque"><b>Por qué SVG por código y no fotos:</b> evita derechos de imagen de personas reales y funciona offline sin descargar nada.</p></div>
+  </details>
+  <details class="fn"><summary>construirTarjeta() · construirPantallaSeleccion() · buscarJugadorPorId() <span class="etiqueta e-ui">avatares.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> crean la tarjeta clicable de cada jugador y rellenan el grid con las 10. La búsqueda encuentra un jugador por su id.</p>
+    <p class="porque"><b>Por qué:</b> el HTML de las tarjetas se genera con un bucle (<span class="codigo">JUGADORES.forEach</span>) en vez de escribir 10 tarjetas a mano. Eso es DRY + uso de bucles.</p></div>
+  </details>
+
+  <h3>⚽ El motor — juego.js &nbsp;<span class="etiqueta e-motor">corazón</span></h3>
+  <details class="fn"><summary>crearPartida(lienzo, jugador, dificultad, opciones) — la FÁBRICA <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> una función que CREA una partida completa e independiente (su balón, su puntaje, su física, su dibujo en su propio canvas) y devuelve sus "controles".</p>
+    <p class="porque"><b>Por qué es la idea más importante del proyecto:</b> el modo 1 jugador usa UNA partida; el modo 2 jugadores usa DOS. El mismo código sirve para ambos → no se repite nada (DRY). Esto es lo que más suma en el 25% de modularidad.</p></div>
+  </details>
+  <details class="fn"><summary>actualizar() — un fotograma de física <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> aplica gravedad, mueve el balón, lo hace girar, rebota en las paredes laterales, y comprueba si tocó el suelo (→ derrota).</p>
+    <p class="porque"><b>Por qué:</b> es el "paso 1" del bucle. Devuelve <span class="key">true/false</span> para que el bucle sepa si seguir o terminar.</p></div>
+  </details>
+  <details class="fn"><summary>patear(offsetX, fueRasguno) <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> el toque exitoso. Impulsa el balón hacia arriba, suma +1, reproduce el sonido, sube la dificultad cada 8, y avisa a sazon.js.</p></div>
+  </details>
+  <details class="fn"><summary>tocarEn(x,y) y tocarCentro() — la REGLA ESTRICTA <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> <span class="codigo">tocarEn</span> es para el clic (mide la distancia al balón con Pitágoras). <span class="codigo">tocarCentro</span> es para la barra espaciadora (mira si el balón está en la "banda de alcance" cerca del suelo). Si fallas → la partida termina ahí mismo (<span class="codigo">fallar()</span>).</p>
+    <p class="porque"><b>Por qué:</b> es el reto del juego. No puedes "spamear" clics: cada intento cuenta. Clic = precisión en el ESPACIO, espacio = precisión en el TIEMPO.</p></div>
+  </details>
+  <details class="fn"><summary>dibujarBalon() · dibujarPanelesBalon() · dibujarSombraBalon() <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> dibujan el balón de fútbol realista: base con gradiente (sombreado 3D), paneles de pentágonos que GIRAN, brillo, y una sombra en el suelo que se encoge con la altura.</p>
+    <p class="porque"><b>Por qué:</b> todo dibujado por código en el canvas, sin imágenes. La sombra da sensación de profundidad (truco clásico de videojuegos).</p></div>
+  </details>
+  <details class="fn"><summary>dibujarCielo() · dibujarGradas() · dibujarCesped() · dibujarContador() <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> pintan el fondo de estadio: cielo con rayos de sol, gradas con público de colores, césped a franjas con gradiente, y el contador grande central.</p></div>
+  </details>
+  <details class="fn"><summary>dibujarAvatar() · ...ConFoto() · ...Vectorial() <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> dibujan al jugador bajo el balón. Si tiene foto real definida y cargada, usa la foto; si no, dibuja el muñeco vectorial (piernas, camiseta, cabeza).</p>
+    <p class="porque"><b>Por qué con respaldo:</b> si la foto no existe o no cargó, NO se rompe nada: cae al muñeco automáticamente.</p></div>
+  </details>
+  <details class="fn"><summary>Juego (módulo 1 jugador): iniciar · bucle · terminarPartida · detener <span class="etiqueta e-motor">juego.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> el controlador del modo 1 jugador. <span class="codigo">iniciar()</span> crea la partida y enciende el bucle; <span class="codigo">terminarPartida()</span> guarda récord y muestra el resultado. Conecta el teclado (espacio), el ratón y el táctil.</p>
+    <p class="porque"><b>Por qué IIFE:</b> está envuelto en <span class="codigo">(function(){...})()</span> para encapsular su estado interno; desde fuera solo se ven <span class="codigo">iniciar</span> y <span class="codigo">detener</span>.</p></div>
+  </details>
+
+  <h3>👥 dosjugadores.js &nbsp;<span class="etiqueta e-motor">2P</span></h3>
+  <details class="fn"><summary>Juego2P: iniciar · bucle · manejarTecla · terminarRonda <span class="etiqueta e-motor">dosjugadores.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> crea DOS partidas con la misma <span class="codigo">crearPartida()</span> y las actualiza en un solo bucle. Tecla <strong>A</strong> = jugador 1, tecla <strong>L</strong> = jugador 2. Cuando ambos pierden, compara puntajes.</p>
+    <p class="porque"><b>Por qué no online:</b> conectar 2 computadoras necesita un servidor (WebSockets), y el proyecto es solo HTML/CSS/JS. Por eso es local en pantalla dividida.</p></div>
+  </details>
+
+  <h3>🎬 main.js — el director &nbsp;<span class="etiqueta e-ui">coordina</span></h3>
+  <details class="fn"><summary>mostrarPantalla(id) · modoAncho() <span class="etiqueta e-ui">main.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> cambia de pantalla quitando/poniendo la clase <span class="codigo">pantalla--activa</span>. <span class="codigo">modoAncho</span> pone el formato apaisado para 2 jugadores.</p></div>
+  </details>
+  <details class="fn"><summary>seleccionarTarjeta() · comenzarPartida() · mostrarResultado() <span class="etiqueta e-ui">main.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> guardan el avatar elegido, arrancan la partida y muestran el Game Over con el texto correcto (cayó solo vs. falta).</p></div>
+  </details>
+  <details class="fn"><summary>conectarEventos() — todos los addEventListener <span class="etiqueta e-ui">main.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> conecta cada botón a su acción (event listeners). Es el "tablero de conexiones" de la interfaz.</p>
+    <p class="porque"><b>Por qué importa para la rúbrica:</b> el criterio 4 pide "uso correcto de eventos". Todo está centralizado aquí, fácil de explicar.</p></div>
+  </details>
+  <details class="fn"><summary>iniciarApp() + DOMContentLoaded <span class="etiqueta e-ui">main.js</span></summary>
+    <div class="cuerpo"><p class="que"><b>Qué:</b> el punto de arranque. Cuando el HTML termina de cargar, construye la pantalla de selección, los selectores de dificultad y conecta los eventos.</p>
+    <p class="porque"><b>Por qué <span class="codigo">DOMContentLoaded</span>:</b> para no buscar botones que todavía no existen. Esperamos a que el HTML esté listo.</p></div>
+  </details>
+</section>
+
+<!-- ====================== CONCEPTOS ====================== -->
+<section id="conceptos">
+  <h2 class="seccion">💡 Conceptos clave (los que el profe puede preguntar)
+    <small>Si entiendes estos 6, entiendes el proyecto.</small>
+  </h2>
+  <div class="concepto"><h4>1. El módulo IIFE — <span class="codigo">(function(){...})()</span></h4>
+    <p>Una función que se ejecuta sola apenas se define. Lo que declaras adentro queda "privado"; solo expones lo que pones en el <span class="codigo">return</span>. Así <b>Sonidos</b>, <b>Juego</b>, <b>Juego2P</b> y <b>Sazon</b> no ensucian el resto del código con sus variables internas.</p></div>
+  <div class="concepto"><h4>2. La función fábrica — <span class="codigo">crearPartida()</span></h4>
+    <p>Una función que devuelve un objeto con "métodos". Cada llamada crea una partida nueva y aislada. Es el truco para que 1 y 2 jugadores compartan el mismo código sin pisarse.</p></div>
+  <div class="concepto"><h4>3. El bucle con requestAnimationFrame</h4>
+    <p>Le pides al navegador: "vuelve a llamarme antes del próximo repintado". Hacerlo en cadena crea la animación a ~60 fps. Guardamos su id para poder <span class="codigo">cancelAnimationFrame</span> al terminar.</p></div>
+  <div class="concepto"><h4>4. Física: posición + velocidad + gravedad</h4>
+    <p>Cada fotograma la velocidad crece por gravedad y la posición cambia por la velocidad. Tocar = darle velocidad hacia arriba. Es la base de casi todos los juegos de plataformas.</p></div>
+  <div class="concepto"><h4>5. Detección de toque con Pitágoras</h4>
+    <p>El balón es un círculo. Un clic acierta si su distancia al centro es menor que el radio (+ tolerancia). Esa distancia se calcula con <span class="codigo">distancia()</span> = teorema de Pitágoras.</p></div>
+  <div class="concepto"><h4>6. La cascada del CSS</h4>
+    <p>Si dos reglas tienen la misma especificidad, gana la que se carga DESPUÉS. Por eso los CSS están numerados 01–09: el número es el orden, y respetarlo evita que un estilo "tape" a otro por error.</p></div>
+</section>
+
+<!-- ====================== DEFENSA ====================== -->
+<section id="defensa">
+  <h2 class="seccion">🎤 Banco de preguntas de defensa
+    <small>Ensaya estas en voz alta con tu compañero. Túrnense para preguntar y responder.</small>
+  </h2>
+
+  <div class="qa"><div class="p">P: ¿Cómo detectas que el clic tocó el balón?</div>
+    <div class="r">R: Con <span class="codigo">distancia()</span> (Pitágoras) en <span class="codigo">tocarEn()</span>. Si la distancia del clic al centro del balón es menor o igual que el radio más la tolerancia, es acierto; si no, la partida termina.</div></div>
+  <div class="qa"><div class="p">P: ¿Cómo sabes que el balón se cayó?</div>
+    <div class="r">R: En <span class="codigo">actualizar()</span> comparo <span class="codigo">balon.y + RADIO_BALON</span> con la posición del suelo (<span class="codigo">obtenerSuelo()</span>). Si lo alcanza, marco la partida como no viva.</div></div>
+  <div class="qa"><div class="p">P: ¿Por qué dividiste el código en tantos archivos?</div>
+    <div class="r">R: Por el criterio de modularidad (25%) y orden (15%). Cada archivo tiene una sola responsabilidad: datos, utilidades, sonido, dibujo, motor, coordinación. Así es más fácil de explicar y de mantener.</div></div>
+  <div class="qa"><div class="p">P: ¿Cómo reutilizas código entre 1 y 2 jugadores?</div>
+    <div class="r">R: Con la fábrica <span class="codigo">crearPartida()</span>. El modo 1 jugador crea una partida; el de 2 crea dos. El mismo motor sirve para ambos, no repito física ni dibujo (DRY).</div></div>
+  <div class="qa"><div class="p">P: ¿Cómo suenan los efectos sin archivos de audio?</div>
+    <div class="r">R: Con la Web Audio API. En <span class="codigo">tono()</span> creo un oscilador con una frecuencia y una ganancia con "fade out". Cero archivos, todo offline.</div></div>
+  <div class="qa"><div class="p">P: ¿Por qué no usaste fotos reales de los jugadores?</div>
+    <div class="r">R: Por derechos de imagen y para funcionar offline sin descargas. Los avatares son SVG generados por código con los colores de cada selección. (Dejamos preparado un campo <span class="codigo">foto</span> opcional para uso local.)</div></div>
+  <div class="qa"><div class="p">P: ¿Dónde está el sistema de puntuación/derrota que pide el enunciado?</div>
+    <div class="r">R: Puntuación: <span class="codigo">puntaje++</span> en <span class="codigo">patear()</span>, y el récord en <span class="codigo">localStorage</span>. Derrota: cuando el balón toca el suelo o fallas un toque, el bucle llama a <span class="codigo">terminarPartida()</span>.</div></div>
+  <div class="qa"><div class="p">P: ¿Cómo usaron la IA?</div>
+    <div class="r">R: Como copiloto. La usamos para estructurar las funciones, generar la física y depurar. Pero entendemos y podemos explicar cada bloque — justo lo que pide la regla de oro del enunciado. (Ver PRESENTACION.md y los commits de Git.)</div></div>
+
+  <div class="card" style="margin-top:20px">
+    <h4 style="margin-top:0; color:var(--verde)">✅ Checklist antes de la entrega</h4>
+    <p>
+      <span class="pill">Abre el juego y juega una partida completa</span>
+      <span class="pill">Revisa que la consola (F12) no tenga errores rojos</span>
+      <span class="pill">Cada quien explica 3 funciones distintas en voz alta</span>
+      <span class="pill">Repasa el historial de commits de Git juntos</span>
+      <span class="pill">Ten a mano README.md, MEMORIA.md y PRESENTACION.md</span>
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Guía de estudio del proyecto <strong>Mundial de Dominadas</strong> · Curso AI Engineer ·
+  Material de apoyo para la defensa. Complementa a <em>README.md</em>, <em>MEMORIA.md</em> y <em>PRESENTACION.md</em>.
+</footer>
+
+</body>
+</html>

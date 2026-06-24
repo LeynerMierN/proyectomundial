@@ -1,32 +1,23 @@
 /**
  * juego.js
  * -----------------------------------------------------------------------------
- * Motor del juego de dominadas. Contiene:
- *
- *   1) crearPartida(lienzo, jugador, dificultad)
- *      Una "fábrica" que devuelve UNA partida independiente: tiene su propio
- *      balón, puntaje, física y dibujo sobre su propio canvas. Se reutiliza
- *      tanto en 1 jugador como en cada mitad del modo de 2 jugadores (DRY).
- *
- *   2) Juego  -> controlador del modo de 1 JUGADOR (usa una sola partida).
- *      Juego.iniciar(jugador, dificultad, alTerminar)
- *      Juego.detener()
- *
- * El modo de 2 jugadores vive en dosjugadores.js y también usa crearPartida().
+ * Motor del juego de dominadas con apartado visual Premium Cyberpunk Arcade
+ * y soporte para renderizado de sprites reales desde la carpeta assets/.
+ * * Correcciones aplicadas:
+ * - Solucionado exploit de barra espaciadora (Hitbox vertical obligatoria).
+ * - Ajuste de proporciones y escala para imágenes reales (.png).
  */
 
-// Constantes que NO dependen de la dificultad ni del tamaño del canvas.
+// Constantes globales de la física del balón
 const RADIO_BALON = 22;
-// Margen base alrededor del balón para aceptar un clic. Reducido para que
-// acertar el toque sea más difícil (zona de clic más ajustada).
 const TOLERANCIA_BASE = 10;
 
 /**
- * Crea una partida independiente sobre un canvas dado.
+ * Crea una partida independiente sobre un canvas dado con renderizado avanzado.
  * @param {HTMLCanvasElement} lienzo - el canvas donde se dibuja.
  * @param {Object} jugador - avatar (de JUGADORES).
  * @param {Object} dificultad - nivel (de DIFICULTADES).
- * @returns {Object} API de la partida (ver el return al final).
+ * @returns {Object} API de la partida.
  */
 function crearPartida(lienzo, jugador, dificultad) {
   const contexto = lienzo.getContext("2d");
@@ -37,6 +28,24 @@ function crearPartida(lienzo, jugador, dificultad) {
   let gravedad = dificultad.gravedadInicial;
   let animacionToque = 0;
   let viva = true;
+
+  // ============================================================================
+  // 📸 CONFIGURACIÓN Y CARGA DE SPRITES DESDE LA CARPETA ASSETS
+  // ============================================================================
+  const spriteJugador = new Image();
+  
+  let nombreArchivo = "mbappe"; 
+  if (typeof jugador !== "undefined" && jugador) {
+    if (jugador.id) {
+      nombreArchivo = String(jugador.id).toLowerCase();
+    } else if (jugador.nombre) {
+      nombreArchivo = String(jugador.nombre).toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "");
+    }
+  }
+  
+  spriteJugador.src = `assets/${nombreArchivo}.png`;
 
   /** Ajusta el tamaño interno del canvas al tamaño que ocupa en pantalla. */
   function configurar() {
@@ -60,20 +69,19 @@ function crearPartida(lienzo, jugador, dificultad) {
     return lienzo.height * 0.58;
   }
 
-  /**
-   * Impulsa el balón hacia arriba (una dominada).
-   * @param {number} offsetX - desfase horizontal del toque para dar efecto.
-   */
+  /** Impulsa el balón hacia arriba (una dominada). */
   function patear(offsetX) {
     balon.vy = dificultad.fuerzaToque;
     balon.vx = limitar(balon.vx - offsetX * 0.08, -7, 7);
     puntaje++;
     animacionToque = 12;
-    Sonidos.toque(puntaje);
+    if (typeof Sonidos !== 'undefined' && Sonidos.toque) {
+      Sonidos.toque(puntaje);
+    }
     aumentarDificultad();
   }
 
-  /** Sube la gravedad cada 8 dominadas (8, 16, 24...), sin pasar del tope. */
+  /** Sube la gravedad cada 8 dominadas sin pasar del tope. */
   function aumentarDificultad() {
     if (puntaje % 8 === 0) {
       gravedad = limitar(
@@ -97,15 +105,21 @@ function crearPartida(lienzo, jugador, dificultad) {
     }
   }
 
-  /** Toca el centro del balón (siempre acierta): para teclado. */
+  /** 🛡️ CORREGIDO: Toca el centro del balón mediante teclado (Barra Espaciadora) */
   function tocarCentro() {
-    if (viva) patear(0);
+    if (!viva || !balon) return;
+    
+    // Definimos la altura ideal de los pies (justo encima del suelo)
+    const alturaPies = obtenerSuelo() - 25;
+    
+    // El jugador solo puede golpear si el balón está en la zona baja de la pantalla
+    // Esto destruye el exploit de puntos infinitos en el aire.
+    if (balon.y >= alturaPies - 80 && balon.y <= alturaPies + 20) {
+      patear(0); // Ejecuta una patada limpia hacia arriba
+    }
   }
 
-  /**
-   * Avanza la física un fotograma.
-   * @returns {boolean} si la partida sigue viva.
-   */
+  /** Avanza la física un fotograma. */
   function actualizar() {
     if (!viva) return false;
     balon.vy += gravedad;
@@ -123,24 +137,26 @@ function crearPartida(lienzo, jugador, dificultad) {
     return viva;
   }
 
-  // -------- Dibujo del estadio (cada partida pinta en su canvas) --------
+  // ============================================================================
+  // 🎨 BLOQUE DE RENDERIZADO: Gráficos del Estadio Neón Cyberpunk
+  // ============================================================================
 
   function dibujarCielo() {
     const cielo = contexto.createLinearGradient(0, 0, 0, obtenerSuelo());
-    cielo.addColorStop(0, "#7ec8f0");
-    cielo.addColorStop(1, "#dff1ff");
+    cielo.addColorStop(0, "#0f172a"); 
+    cielo.addColorStop(0.6, "#1e1b4b"); 
+    cielo.addColorStop(1, "#311042"); 
     contexto.fillStyle = cielo;
     contexto.fillRect(0, 0, lienzo.width, obtenerSuelo());
 
     contexto.save();
-    contexto.translate(lienzo.width / 2, -20);
-    contexto.fillStyle = "rgba(255, 255, 200, 0.18)";
-    for (let i = 0; i < 8; i++) {
-      contexto.rotate((Math.PI * 2) / 8);
+    contexto.fillStyle = "rgba(0, 240, 255, 0.03)";
+    for (let i = 1; i <= 3; i++) {
+      const posX = (lienzo.width / 4) * i;
       contexto.beginPath();
-      contexto.moveTo(0, 0);
-      contexto.lineTo(-30, lienzo.height);
-      contexto.lineTo(30, lienzo.height);
+      contexto.moveTo(posX, 0);
+      contexto.lineTo(posX - 50, obtenerSuelo());
+      contexto.lineTo(posX + 50, obtenerSuelo());
       contexto.closePath();
       contexto.fill();
     }
@@ -149,100 +165,195 @@ function crearPartida(lienzo, jugador, dificultad) {
 
   function dibujarGradas() {
     const yGrada = obtenerSuelo() - 46;
-    contexto.fillStyle = "#3a3f4b";
+    contexto.fillStyle = "#0f111a";
     contexto.fillRect(0, yGrada, lienzo.width, 46);
-    const colores = ["#ff5252", "#ffd54f", "#4fc3f7", "#fff", "#81c784"];
+    
+    contexto.strokeStyle = "#ff007f";
+    contexto.lineWidth = 1.5;
+    contexto.beginPath();
+    contexto.moveTo(0, yGrada);
+    contexto.lineTo(lienzo.width, yGrada);
+    contexto.stroke();
+
+    const colores = ["#ff5252", "#ffd54f", "#00f0ff", "#ffffff", "#81c784"];
+    contexto.save();
     for (let fila = 0; fila < 3; fila++) {
       for (let x = 6; x < lienzo.width; x += 12) {
+        const desvioY = Math.sin((Date.now() * 0.004) + x) * 1.2;
         contexto.fillStyle = colores[(x + fila) % colores.length];
         contexto.beginPath();
-        contexto.arc(x, yGrada + 10 + fila * 12, 2.5, 0, Math.PI * 2);
+        contexto.arc(x, yGrada + 10 + fila * 12 + desvioY, 1.8, 0, Math.PI * 2);
         contexto.fill();
       }
     }
+    contexto.restore();
   }
 
   function dibujarCesped() {
     const inicio = obtenerSuelo();
     const alto = lienzo.height - inicio;
-    contexto.fillStyle = "#2e8b57";
+    
+    const gradienteCesped = contexto.createLinearGradient(0, inicio, 0, lienzo.height);
+    gradienteCesped.addColorStop(0, "#064e3b"); 
+    gradienteCesped.addColorStop(1, "#022c22");
+    contexto.fillStyle = gradienteCesped;
     contexto.fillRect(0, inicio, lienzo.width, alto);
-    contexto.fillStyle = "rgba(255, 255, 255, 0.06)";
-    const numFranjas = 6;
-    const ancho = lienzo.width / numFranjas;
-    for (let i = 0; i < numFranjas; i += 2) {
+
+    contexto.fillStyle = "rgba(0, 240, 255, 0.015)";
+    const ancho = lienzo.width / 6;
+    for (let i = 0; i < 6; i += 2) {
       contexto.fillRect(i * ancho, inicio, ancho, alto);
     }
+
+    contexto.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    contexto.lineWidth = 2;
+    contexto.beginPath();
+    contexto.moveTo(0, inicio + 2);
+    contexto.lineTo(lienzo.width, inicio + 2);
+    contexto.stroke();
   }
 
-  /** Contador grande centrado; su tamaño se adapta a la altura del canvas. */
   function dibujarContador() {
     contexto.save();
     contexto.textAlign = "center";
     contexto.textBaseline = "middle";
-    contexto.font = `bold ${Math.round(lienzo.height * 0.2)}px Segoe UI, Arial`;
+    contexto.font = `bold ${Math.round(lienzo.height * 0.22)}px 'Segoe UI', Arial, sans-serif`;
+    
+    contexto.shadowBlur = 15;
+    contexto.shadowColor = "rgba(0, 240, 255, 0.5)";
+    contexto.strokeStyle = "rgba(0, 240, 255, 0.1)";
     contexto.lineWidth = 6;
-    contexto.strokeStyle = "rgba(0, 0, 0, 0.25)";
-    contexto.fillStyle = "rgba(255, 255, 255, 0.92)";
     contexto.strokeText(puntaje, lienzo.width / 2, lienzo.height * 0.26);
+    
+    contexto.fillStyle = "rgba(255, 255, 255, 0.07)";
     contexto.fillText(puntaje, lienzo.width / 2, lienzo.height * 0.26);
     contexto.restore();
   }
 
   function dibujarBalon() {
+    if (!balon) return;
     contexto.save();
+    
+    contexto.shadowBlur = Math.min(10 + puntaje, 25);
+    contexto.shadowColor = "#00f0ff";
+
     contexto.beginPath();
     contexto.arc(balon.x, balon.y, RADIO_BALON, 0, Math.PI * 2);
     contexto.fillStyle = "#ffffff";
     contexto.fill();
-    contexto.lineWidth = 2;
-    contexto.strokeStyle = "#222";
+    contexto.lineWidth = 2.5;
+    contexto.strokeStyle = "#1a1a1a";
     contexto.stroke();
+
+    contexto.shadowBlur = 0; 
+    contexto.strokeStyle = "rgba(26, 26, 26, 0.6)";
+    contexto.lineWidth = 1.2;
+    
+    contexto.fillStyle = "#1a1a1a";
     contexto.beginPath();
-    contexto.arc(balon.x, balon.y, RADIO_BALON * 0.4, 0, Math.PI * 2);
-    contexto.fillStyle = "#222";
+    contexto.arc(balon.x, balon.y, RADIO_BALON * 0.35, 0, Math.PI * 2);
     contexto.fill();
+
+    for (let i = 0; i < 5; i++) {
+      const angulo = (i * Math.PI * 2) / 5;
+      contexto.beginPath();
+      contexto.moveTo(
+        balon.x + Math.cos(angulo) * (RADIO_BALON * 0.35), 
+        balon.y + Math.sin(angulo) * (RADIO_BALON * 0.35)
+      );
+      contexto.lineTo(
+        balon.x + Math.cos(angulo) * RADIO_BALON, 
+        balon.y + Math.sin(angulo) * RADIO_BALON
+      );
+      contexto.stroke();
+    }
     contexto.restore();
   }
 
   function dibujarAvatar() {
+    if (!balon) return;
+
     const baseX = balon.x;
-    const baseY = lienzo.height - 8;
-    const inclina = animacionToque > 0 ? -6 : 0;
+    // Bajamos la base un poco más hacia el fondo del lienzo para asentar imágenes grandes
+    const baseY = lienzo.height; 
+    const inclina = animacionToque > 0 ? -0.12 : 0; 
     if (animacionToque > 0) animacionToque--;
 
     contexto.save();
-    contexto.strokeStyle = "#1a1a1a";
-    contexto.lineWidth = 6;
-    contexto.beginPath();
-    contexto.moveTo(baseX, baseY - 30);
-    contexto.lineTo(baseX - 8, baseY);
-    contexto.moveTo(baseX, baseY - 30);
-    contexto.lineTo(baseX + 8 + inclina, baseY + inclina);
-    contexto.stroke();
-    contexto.fillStyle = jugador.colorPrimario;
-    contexto.fillRect(baseX - 12, baseY - 55, 24, 28);
-    contexto.beginPath();
-    contexto.arc(baseX, baseY - 64, 10, 0, Math.PI * 2);
-    contexto.fillStyle = jugador.colorPiel;
-    contexto.fill();
+
+    // 🌟 RENDERIZADO CORREGIDO: Proporciones HD para imágenes reales (.png)
+    if (spriteJugador && spriteJugador.complete && spriteJugador.naturalWidth > 0) {
+      contexto.save();
+      contexto.translate(baseX, baseY);
+      
+      if (inclina !== 0) {
+        contexto.rotate(inclina);
+      }
+      
+      // Aumentamos dimensiones globales para que no se vea minúsculo en el split screen
+      const anchoSprite = 110;
+      const altoSprite = 140;
+      
+      // Renderizamos la imagen ajustando el desfase vertical para que pise el suelo de forma natural
+      contexto.drawImage(spriteJugador, -anchoSprite / 2, -altoSprite + 10, anchoSprite, altoSprite);
+      contexto.restore();
+    } else {
+      // 📐 RESPALDO GEOMÉTRICO MODERNO
+      const sueloPalito = lienzo.height - 8;
+      contexto.strokeStyle = "#1a1a1a";
+      contexto.lineWidth = 5;
+      contexto.lineCap = "round";
+      contexto.beginPath();
+      contexto.moveTo(baseX, sueloPalito - 30);
+      contexto.lineTo(baseX - 8, sueloPalito);
+      contexto.moveTo(baseX, sueloPalito - 30);
+      contexto.lineTo(baseX + 8 + (inclina * 50), sueloPalito + (inclina * 50));
+      contexto.stroke();
+
+      contexto.fillStyle = (jugador && jugador.colorPrimario) ? jugador.colorPrimario : "#333";
+      contexto.fillRect(baseX - 13, sueloPalito - 55, 26, 26);
+      
+      contexto.fillStyle = "#fff";
+      contexto.beginPath();
+      contexto.moveTo(baseX - 5, sueloPalito - 55);
+      contexto.lineTo(baseX + 5, sueloPalito - 55);
+      contexto.lineTo(baseX, sueloPalito - 49);
+      contexto.closePath();
+      contexto.fill();
+
+      contexto.beginPath();
+      contexto.arc(baseX, sueloPalito - 66, 11, 0, Math.PI * 2);
+      contexto.fillStyle = (jugador && jugador.colorPiel) ? jugador.colorPiel : "#f39c12";
+      contexto.fill();
+      contexto.lineWidth = 1.5;
+      contexto.strokeStyle = "#1a1a1a";
+      contexto.stroke();
+
+      contexto.fillStyle = "#1a1a1a";
+      contexto.beginPath();
+      contexto.arc(baseX - 3.5, sueloPalito - 67, 1.5, 0, Math.PI * 2);
+      contexto.arc(baseX + 3.5, sueloPalito - 67, 1.5, 0, Math.PI * 2);
+      contexto.fill();
+    }
+    
     contexto.restore();
   }
 
-  /** Si la partida murió, oscurece el campo y muestra "FUERA". */
   function dibujarFueraDeJuego() {
     contexto.save();
-    contexto.fillStyle = "rgba(0, 0, 0, 0.5)";
+    contexto.fillStyle = "rgba(15, 23, 42, 0.65)";
     contexto.fillRect(0, 0, lienzo.width, lienzo.height);
-    contexto.fillStyle = "#fff";
+    
+    contexto.fillStyle = "#ffffff";
     contexto.textAlign = "center";
     contexto.textBaseline = "middle";
-    contexto.font = "bold 28px Segoe UI, Arial";
+    contexto.font = "bold 28px 'Segoe UI', Arial";
+    contexto.shadowBlur = 10;
+    contexto.shadowColor = "#ff007f";
     contexto.fillText("¡FUERA! 😵", lienzo.width / 2, lienzo.height / 2);
     contexto.restore();
   }
 
-  /** Pinta una escena completa. */
   function dibujar() {
     dibujarCielo();
     dibujarGradas();
@@ -259,28 +370,28 @@ function crearPartida(lienzo, jugador, dificultad) {
     tocarCentro,
     actualizar,
     dibujar,
-    get puntaje() {
-      return puntaje;
-    },
-    get viva() {
-      return viva;
-    },
+    get puntaje() { return puntaje; },
+    get viva() { return viva; },
   };
 }
 
-/**
- * Convierte las coordenadas de un evento (ratón o tacto) a coordenadas internas
- * del canvas indicado. Función compartida por ambos modos.
- * @param {HTMLCanvasElement} lienzo
- * @param {MouseEvent|Touch} evento
- * @returns {{x:number, y:number}}
- */
 function coordenadasEnLienzo(lienzo, evento) {
   const rect = lienzo.getBoundingClientRect();
   return {
     x: (evento.clientX - rect.left) * (lienzo.width / rect.width),
     y: (evento.clientY - rect.top) * (lienzo.height / rect.height),
   };
+}
+
+if (typeof limitar !== 'function') {
+  function limitar(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  }
+}
+if (typeof distancia !== 'function') {
+  function distancia(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+  }
 }
 
 // ============================================================================
@@ -292,6 +403,11 @@ const Juego = (function () {
   let alTerminarCallback;
   let idAnimacion = null;
 
+  function buscarElemento(selector) {
+    if (typeof buscar === 'function') return buscar(selector);
+    return document.querySelector(selector);
+  }
+
   function manejarToque(evento) {
     const p = coordenadasEnLienzo(lienzo, evento);
     partida.tocarEn(p.x, p.y);
@@ -299,7 +415,7 @@ const Juego = (function () {
 
   function manejarTactil(evento) {
     evento.preventDefault();
-    manejarToque(evento.touches[0]);
+    if (evento.touches.length > 0) manejarToque(evento.touches[0]);
   }
 
   function manejarTecla(evento) {
@@ -311,7 +427,7 @@ const Juego = (function () {
 
   function activarControles() {
     lienzo.addEventListener("mousedown", manejarToque);
-    lienzo.addEventListener("touchstart", manejarTactil);
+    lienzo.addEventListener("touchstart", manejarTactil, { passive: false });
     document.addEventListener("keydown", manejarTecla);
   }
 
@@ -323,8 +439,10 @@ const Juego = (function () {
 
   function bucle() {
     const viva = partida.actualizar();
-    partida.dibujar();
-    buscar("#marcador-puntaje").textContent = partida.puntaje;
+    partida.partida ? null : partida.dibujar(); 
+    
+    const elPuntaje = buscarElemento("#marcador-puntaje");
+    if (elPuntaje) elPuntaje.textContent = partida.puntaje;
 
     if (!viva) {
       terminarPartida();
@@ -335,28 +453,36 @@ const Juego = (function () {
 
   function terminarPartida() {
     detener();
-    const esRecord = guardarRecordSiEsMayor(partida.puntaje);
-    if (esRecord && partida.puntaje > 0) Sonidos.record();
-    else Sonidos.gameOver();
-    alTerminarCallback(partida.puntaje, esRecord);
+    let esRecord = false;
+    if (typeof guardarRecordSiEsMayor === 'function') {
+      esRecord = guardarRecordSiEsMayor(partida.puntaje);
+    }
+    
+    if (typeof Sonidos !== 'undefined') {
+      if (esRecord && partida.puntaje > 0 && Sonidos.record) Sonidos.record();
+      else if (Sonidos.gameOver) Sonidos.gameOver();
+    }
+    
+    if (alTerminarCallback) alTerminarCallback(partida.puntaje, esRecord);
   }
 
-  /**
-   * Arranca una partida de 1 jugador.
-   * @param {Object} jugador
-   * @param {Object} dificultad
-   * @param {Function} alTerminar - callback(puntaje, esRecord).
-   */
   function iniciar(jugador, dificultad, alTerminar) {
-    lienzo = buscar("#lienzo-juego");
+    lienzo = buscarElemento("#lienzo-juego");
+    if (!lienzo) return;
+    
     alTerminarCallback = alTerminar;
     partida = crearPartida(lienzo, jugador, dificultad);
     partida.configurar();
     activarControles();
 
-    buscar("#marcador-jugador").textContent = jugador.bandera;
-    buscar("#marcador-record").textContent = leerRecord();
-    buscar("#marcador-puntaje").textContent = 0;
+    const mJugador = buscarElemento("#marcador-jugador");
+    if (mJugador) mJugador.textContent = jugador.bandera || "";
+    
+    const mRecord = buscarElemento("#marcador-record");
+    if (mRecord && typeof leerRecord === 'function') mRecord.textContent = leerRecord();
+    
+    const mPuntaje = buscarElemento("#marcador-puntaje");
+    if (mPuntaje) mPuntaje.textContent = 0;
 
     bucle();
   }

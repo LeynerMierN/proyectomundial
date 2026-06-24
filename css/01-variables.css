@@ -1,0 +1,72 @@
+/**
+ * css/01-variables.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 1 de 8 — Variables globales y reset.
+ *
+ * Por qué va primero: define las variables (--color-acento, --radio, etc.)
+ * que TODOS los demás archivos CSS usan. Si este archivo cargara después de
+ * otro que ya use una variable, esa variable no existiría a tiempo. Por eso
+ * el orden de los <link> en index.html importa y siempre debe respetarse.
+ *
+ * Contiene:
+ *   - :root          -> paleta de colores y medidas reutilizables.
+ *   - *               -> reset básico (sin márgenes/rellenos por defecto).
+ *   - body            -> fondo general de toda la página.
+ *   - body::before     -> reflectores de estadio que barren el fondo (decorativo).
+ */
+
+:root {
+  --color-cesped: #2e8b57;
+  --color-cesped-oscuro: #1f6b41;
+  --color-cielo: #0a1929;
+  --color-acento: #ffd60a;
+  --color-acento-hover: #ffe34d;
+  --color-texto: #ffffff;
+  --color-panel: rgba(0, 0, 0, 0.45);
+  --radio: 14px;
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --fuente: "Segoe UI", system-ui, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--fuente);
+  color: var(--color-texto);
+  background: radial-gradient(circle at 50% -10%, #1d4368, var(--color-cielo) 65%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Reflectores de estadio que barren el fondo de toda la página. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 0deg,
+    rgba(120, 190, 255, 0.1) 25deg,
+    transparent 55deg,
+    rgba(255, 214, 10, 0.08) 130deg,
+    transparent 170deg,
+    rgba(120, 190, 255, 0.1) 250deg,
+    transparent 300deg
+  );
+  animation: girar-reflectores 18s linear infinite;
+  z-index: 0;
+}
+
+@keyframes girar-reflectores {
+  to {
+    transform: rotate(360deg);
+  }
+}

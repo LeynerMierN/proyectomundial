@@ -9,11 +9,13 @@
  *   - Jugador 1: tecla "A" o clic en su campo.
  *   - Jugador 2: tecla "L" o clic en su campo.
  *
- * Cuando a un jugador se le cae el balón queda "fuera". Cuando ambos están
- * fuera, termina y se compara el puntaje para declarar ganador.
+ * Cuando a un jugador se le cae el balón (o falla un clic/espacio fuera de la
+ * zona válida) queda "fuera". Cuando ambos están fuera, termina y se compara
+ * el puntaje para declarar ganador.
  *
  * Expone el objeto global `Juego2P`:
  *   Juego2P.iniciar(jugador1, jugador2, dificultad, alTerminar)
+ *     alTerminar(puntaje1, puntaje2, motivo1, motivo2)
  *   Juego2P.detener()
  */
 
@@ -77,8 +79,16 @@ const Juego2P = (function () {
 
   function terminarRonda() {
     detener();
-    Sonidos.gameOver();
-    alTerminarCallback(partida1.puntaje, partida2.puntaje);
+    const huboFalla =
+      partida1.motivoDerrota === "falla" || partida2.motivoDerrota === "falla";
+    if (huboFalla) Sonidos.fallo();
+    else Sonidos.gameOver();
+    alTerminarCallback(
+      partida1.puntaje,
+      partida2.puntaje,
+      partida1.motivoDerrota,
+      partida2.motivoDerrota
+    );
   }
 
   /**
@@ -93,8 +103,8 @@ const Juego2P = (function () {
     lienzo2 = buscar("#lienzo-p2");
     alTerminarCallback = alTerminar;
 
-    partida1 = crearPartida(lienzo1, jugador1, dificultad);
-    partida2 = crearPartida(lienzo2, jugador2, dificultad);
+    partida1 = crearPartida(lienzo1, jugador1, dificultad, { alAnotar: Sazon.alAnotar });
+    partida2 = crearPartida(lienzo2, jugador2, dificultad, { alAnotar: Sazon.alAnotar });
     partida1.configurar();
     partida2.configurar();
     activarControles();

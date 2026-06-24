@@ -4,7 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mundial de Dominadas ⚽</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <!--
+      El CSS está dividido en 9 archivos por responsabilidad (en vez de un
+      único archivo gigante) para que cada parte se pueda explicar por
+      separado. EL ORDEN IMPORTA: si dos archivos definen la misma clase con
+      la misma especificidad, gana el que carga DESPUÉS (cascada de CSS), así
+      que respeta este orden si agregas uno nuevo. Ver css/README.md para el
+      detalle de qué hace cada archivo.
+    -->
+    <link rel="stylesheet" href="css/01-variables.css" />
+    <link rel="stylesheet" href="css/02-layout.css" />
+    <link rel="stylesheet" href="css/03-componentes.css" />
+    <link rel="stylesheet" href="css/04-menu-inicio.css" />
+    <link rel="stylesheet" href="css/05-seleccion.css" />
+    <link rel="stylesheet" href="css/06-juego.css" />
+    <link rel="stylesheet" href="css/07-fin.css" />
+    <link rel="stylesheet" href="css/08-utilidades.css" />
+    <link rel="stylesheet" href="css/09-sazon.css" />
   </head>
   <body>
     <!--
@@ -76,7 +92,8 @@
         </header>
         <canvas id="lienzo-juego" class="lienzo"></canvas>
         <p class="ayuda-juego">
-          🖱️ Haz clic en el balón &nbsp;|&nbsp; ⌨️ o pulsa la barra espaciadora
+          🖱️ Clic certero en el balón &nbsp;|&nbsp; ⌨️ espacio solo cuando esté
+          a tu alcance. <strong>¡Un fallo es game over!</strong>
         </p>
       </section>
 
@@ -116,7 +133,9 @@
               <span class="campo-2p__puntaje" id="puntaje-p1">0</span>
             </div>
             <canvas id="lienzo-p1" class="lienzo lienzo--2p"></canvas>
-            <p class="campo-2p__tecla">Tecla <kbd>A</kbd> o clic</p>
+            <p class="campo-2p__tecla">
+              Tecla <kbd>A</kbd> o clic — ¡un fallo te saca!
+            </p>
           </div>
           <div class="campo-2p">
             <div class="campo-2p__cabecera campo-2p__cabecera--p2">
@@ -124,7 +143,9 @@
               <span class="campo-2p__puntaje" id="puntaje-p2">0</span>
             </div>
             <canvas id="lienzo-p2" class="lienzo lienzo--2p"></canvas>
-            <p class="campo-2p__tecla">Tecla <kbd>L</kbd> o clic</p>
+            <p class="campo-2p__tecla">
+              Tecla <kbd>L</kbd> o clic — ¡un fallo te saca!
+            </p>
           </div>
         </div>
       </section>
@@ -152,10 +173,13 @@
           <span></span><span></span><span></span><span></span><span></span>
           <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <h2 class="titulo-seccion titulo-fin">¡Se cayó el balón! 😵</h2>
+        <h2 class="titulo-seccion titulo-fin" id="titulo-fin">
+          ¡Se cayó el balón! 😵
+        </h2>
         <p class="resultado">
           Hiciste <span id="puntaje-final">0</span> dominadas.
         </p>
+        <p id="motivo-fin" class="motivo-fin">El balón tocó el suelo.</p>
         <p id="mensaje-record" class="mensaje-record oculto">
           🎉 ¡Nuevo récord!
         </p>
@@ -178,6 +202,7 @@
     <script src="js/data/dificultades.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/sonidos.js"></script>
+    <script src="js/sazon.js"></script>
     <script src="js/avatares.js"></script>
     <script src="js/juego.js"></script>
     <script src="js/dosjugadores.js"></script>

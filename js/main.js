@@ -94,16 +94,28 @@ function comenzarPartida() {
 }
 
 /**
- * Muestra el resultado de 1 jugador.
+ * Muestra el resultado de 1 jugador. Cambia el título y el texto del motivo
+ * según si el balón cayó solo o si fue un toque fallido (clic/espacio fuera
+ * de la zona válida), para que quede claro qué pasó.
  * @param {number} puntaje
  * @param {boolean} esRecord
+ * @param {string} motivo - "suelo" o "falla".
  */
-function mostrarResultado(puntaje, esRecord) {
+function mostrarResultado(puntaje, esRecord, motivo) {
   buscar("#puntaje-final").textContent = puntaje;
   const hayRecord = esRecord && puntaje > 0;
   buscar("#mensaje-record").classList.toggle("oculto", !hayRecord);
   // El confeti solo se lanza si hubo récord.
   buscar("#pantalla-fin").classList.toggle("celebrando", hayRecord);
+
+  const esFalla = motivo === "falla";
+  buscar("#titulo-fin").textContent = esFalla
+    ? "¡Patada en falso! ❌"
+    : "¡Se cayó el balón! 😵";
+  buscar("#motivo-fin").textContent = esFalla
+    ? "Tocaste fuera de la zona del balón y perdiste el control."
+    : "El balón tocó el suelo.";
+
   mostrarPantalla("pantalla-fin");
 }
 
@@ -150,13 +162,21 @@ function iniciarRonda2P(j1, j2) {
 }
 
 /**
- * Muestra el resultado de la ronda de 2 jugadores y declara ganador.
+ * Muestra el resultado de la ronda de 2 jugadores y declara ganador. Si
+ * alguien terminó por un toque fallido (no por el balón cayendo solo), se
+ * marca con ❌ junto a su puntaje.
  * @param {number} p1 - dominadas del jugador 1.
  * @param {number} p2 - dominadas del jugador 2.
+ * @param {string} motivo1 - "suelo" o "falla", cómo terminó el jugador 1.
+ * @param {string} motivo2 - "suelo" o "falla", cómo terminó el jugador 2.
  */
-function mostrarResultado2P(p1, p2) {
-  buscar("#resumen-p1").textContent = `🔵 ${ultimosJugadores2P.j1.nombre}: ${p1}`;
-  buscar("#resumen-p2").textContent = `🔴 ${ultimosJugadores2P.j2.nombre}: ${p2}`;
+function mostrarResultado2P(p1, p2, motivo1, motivo2) {
+  const marca1 = motivo1 === "falla" ? " ❌" : "";
+  const marca2 = motivo2 === "falla" ? " ❌" : "";
+  buscar("#resumen-p1").textContent =
+    `🔵 ${ultimosJugadores2P.j1.nombre}: ${p1}${marca1}`;
+  buscar("#resumen-p2").textContent =
+    `🔴 ${ultimosJugadores2P.j2.nombre}: ${p2}${marca2}`;
 
   let titulo;
   if (p1 > p2) titulo = `🏆 ¡Ganó ${ultimosJugadores2P.j1.nombre}!`;

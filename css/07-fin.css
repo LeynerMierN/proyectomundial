@@ -1,0 +1,78 @@
+/**
+ * css/07-fin.css
+ * -----------------------------------------------------------------------------
+ * ARCHIVO 7 de 8 — Pantalla de Game Over (1 jugador).
+ *
+ * Qué resuelve: el resultado final de una partida: el puntaje, el motivo
+ * ("se cayó solo" vs "patada en falso"), el aviso de récord y los botones
+ * para reintentar o cambiar de jugador. La pantalla de resultado de 2
+ * jugadores reutiliza varias de estas mismas clases (.botones-fin, etc.).
+ *
+ * Contiene:
+ *   - .resultado / .motivo-fin -> texto del puntaje y por qué terminó.
+ *   - .titulo-fin              -> título con una sacudida al aparecer.
+ *   - #puntaje-final            -> número grande con efecto "pop".
+ *   - .mensaje-record           -> aviso de nuevo récord, con latido.
+ *   - .botones-fin              -> contenedor de los botones de esta pantalla.
+ */
+
+.resultado {
+  font-size: 1.3rem;
+}
+
+.motivo-fin {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+/* Título del game over con una breve sacudida al aparecer. */
+.titulo-fin {
+  animation: sacudir 0.5s ease;
+}
+
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-2deg); }
+  40% { transform: translateX(8px) rotate(2deg); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+#puntaje-final {
+  display: inline-block;
+  color: var(--color-acento);
+  font-weight: 800;
+  font-size: 2.4rem;
+  /* El puntaje final entra con un "pop". */
+  animation: pop-puntaje 0.5s cubic-bezier(0.2, 1.4, 0.5, 1) both;
+}
+
+@keyframes pop-puntaje {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+.mensaje-record {
+  font-size: 1.2rem;
+  color: var(--color-acento);
+  font-weight: 700;
+  animation: latir 0.8s infinite alternate;
+}
+
+@keyframes latir {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.botones-fin {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}

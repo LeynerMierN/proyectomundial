@@ -124,6 +124,120 @@ pantalla dividida**.
 `KeyL` a `partida2.tocarCentro()`; como cada partida es un objeto aparte, sus
 estados nunca se mezclan.
 
+### Regla estricta de impacto (iteración 4)
+
+Al principio, un clic que no caía sobre el balón simplemente **no hacía
+nada**: el jugador podía "espamear" clics por toda la pantalla sin
+consecuencia, esperando acertar por suerte. Eso le quitaba reto al juego.
+Cambiamos la lógica a una estructura **if/else sin escape** en `tocarEn()` y
+`tocarCentro()` (`juego.js`):
+
+```js
+function tocarEn(x, y) {
+  if (!viva) return;
+  if (distancia(x, y, balon.x, balon.y) <= RADIO_BALON + tolerancia()) {
+    patear(x - balon.x);   // ÉXITO: dentro de la zona del balón
+  } else {
+    fallar();              // FALTA: termina la partida YA, sin excepciones
+  }
+}
+```
+
+El reto fue la **barra espaciadora**: a diferencia del clic, no tiene
+coordenadas (x, y) que comparar contra el balón. La solución fue cambiar la
+pregunta de "¿DÓNDE tocaste?" a "¿CUÁNDO tocaste?": `zonaAlcance()` define una
+banda vertical cerca del suelo (del mismo tamaño que la tolerancia del clic,
+para que la dificultad sea consistente entre ambos controles). Si presionas
+espacio y el balón todavía está arriba, fuera de esa banda, también es falta.
+Así, tanto clic como teclado **exigen precisión real**, cada uno en su propia
+dimensión (espacio para el mouse, tiempo para el teclado).
+
+Para diferenciar "el balón cayó solo" de "el jugador falló", la partida guarda
+un `motivoDerrota` (`"suelo"` o `"falla"`), que cambia el mensaje, el color de
+la pantalla de Game Over (rojo para falta) y el sonido (`Sonidos.fallo()`, un
+doble buzz grave, distinto del tono descendente de `Sonidos.gameOver()`).
+
+**Pregunta de defensa típica:** *¿Cómo probaron que la regla funciona sin
+depender de animaciones lentas?* → Llamamos `crearPartida()` directamente y
+avanzamos `actualizar()` en un bucle `while` síncrono (sin `requestAnimationFrame`),
+lo que simula muchos fotogramas al instante y hace la prueba determinista —
+clave para distinguir un bug real de la simple lentitud del navegador al
+limitar `requestAnimationFrame` en pestañas en segundo plano.
+
+### CSS segmentado en 9 archivos (iteración 5)
+
+`css/styles.css` llegó a tener más de 800 líneas, lo que lo hacía difícil de
+explicar de un tirón en la defensa. Se dividió en 9 archivos por
+responsabilidad (`01-variables.css` … `09-sazon.css`), cada uno cargado con su
+propio `<link>` en `index.html`, **en un orden que importa**: si dos archivos
+definen la misma clase, gana el que carga después (cascada de CSS) — por eso
+están numerados. El detalle completo está en
+[`css/README.md`](../css/README.md).
+
+**Pregunta de defensa típica:** *¿Cómo verificaron que dividir el CSS no
+cambió nada visual?* → No usamos capturas de pantalla (fallaban en esa sesión
+de pruebas); en vez de eso, comparamos los **estilos computados**
+(`getComputedStyle`) de varios elementos clave (`#app`, `.titulo`,
+`.boton--principal`, `.lienzo`) antes y después de la división, y confirmamos
+que las 8 (ahora 9) hojas cargaban sin error 404 y en el orden correcto.
+
+### "Sazón": personalidad sin acoplarse a la física (iteración 6)
+
+Se integró una idea de mensajes de hinchada costeña (elogios, sustos al
+"raspar" un toque, una mecánica de despiste a las 10 dominadas, y un himno al
+llegar a 100) inspirada en una propuesta externa. Esa propuesta no se podía
+copiar tal cual: usaba variables que no existen en este proyecto (`ballTop`,
+`juegoActivo`, un `<div id="arcade-container">`) y cargaba un audio desde una
+URL de Google, lo cual rompería el "100% offline" que promete el README.
+
+En vez de pegar el código, se **adaptó la idea** con un gancho opcional en el
+motor: `crearPartida(lienzo, jugador, dificultad, opciones)` ahora acepta
+`opciones.alAnotar(info)`, una función que se llama en cada toque acertado con
+`{ puntaje, jugador, fueRasguno, contenedor, pausar }`. `juego.js` NO sabe qué
+significan esos datos para la "personalidad" del juego — solo los reporta.
+Toda la decisión de qué mensaje mostrar y cuándo vive en `sazon.js`, un
+archivo nuevo que no toca física ni canvas.
+
+```js
+// juego.js — el motor solo REPORTA, no decide:
+if (typeof opciones.alAnotar === "function") {
+  opciones.alAnotar({ puntaje, jugador, fueRasguno, contenedor, pausar });
+}
+
+// sazon.js — la personalidad decide qué hacer con ese reporte:
+function alAnotar({ puntaje, jugador, fueRasguno, contenedor, pausar }) {
+  if (fueRasguno) mostrarTextoFlotante(contenedor, alAzar(MENSAJES_AZARE), true);
+  if (puntaje === 10) { /* despiste */ pausar(1500, -8); return; }
+  if (puntaje % 8 === 0) mostrarTextoFlotante(contenedor, alAzar(ELOGIOS_COSTENOS), false);
+  if (puntaje === 100) { /* himno */ Sonidos.himno(); }
+}
+```
+
+Dos cambios respecto a la propuesta original, explicados con su motivo:
+- **Himno sintetizado, no descargado:** se reemplazó la URL externa por
+  `Sonidos.himno()`, un arpegio generado con la misma Web Audio API que ya
+  usa el resto del juego. Mismo efecto, cero dependencia de internet.
+- **Sin "victoria a las 21":** esa regla pertenece a un diseño de puntaje
+  fijo; el nuestro es de **puntaje infinito** (compites contra tu récord), así
+  que no se portó.
+
+Para que el mensaje de cada jugador aparezca sobre SU mitad de la pantalla
+(no sobre toda la pantalla) en el modo 2 jugadores, `crearPartida()` calcula
+su propio `contenedor` con `lienzo.closest(".campo-2p, .pantalla")`: si el
+canvas está dentro de una columna `.campo-2p` (2 jugadores), usa esa columna;
+si no, usa la pantalla completa (1 jugador).
+
+**Pregunta de defensa típica:** *¿Cómo decidieron cuándo un toque "raspó" el
+borde?* → Para el clic, si la distancia al centro del balón cae en el 20% más
+externo del margen permitido. Para el teclado no hay coordenadas, así que se
+compara la altura del balón contra el 20% más cercano al límite real de
+derrota. Se probó primero con un margen fijo de 4 píxeles y casi nunca se
+detectaba: cerca del suelo el balón cae varios píxeles por fotograma, así que
+una ventana fija y pequeña se la salta entre un fotograma y el siguiente. Se
+cambió a un margen **proporcional** (20% de la banda) y ahí sí se disparaba de
+forma consistente — un buen ejemplo de por qué hay que probar con números
+reales, no solo confiar en que "se ve bien en la lógica".
+
 ---
 
 ## 🤖 Cómo usamos la IA (y cómo explicar el código)

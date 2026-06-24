@@ -40,6 +40,7 @@ equipo en la defensa) entienda el razonamiento detrás del código.
 | Himno sintetizado (no audio remoto) | La propuesta original cargaba un sonido desde una URL de Google. Eso rompería el "100% offline" que ya promete el README y agrega una dependencia de red innecesaria. Se reemplazó por `Sonidos.himno()`, un arpegio generado con la misma Web Audio API que ya usábamos. |
 | Sin "victoria a las 21 dominadas" | La propuesta original mantenía esa regla de un diseño distinto (puntaje con tope). Nuestro juego es de **puntaje infinito** (compites contra tu récord), así que esa regla no aplicaba y no se portó. |
 | Campo `foto` opcional por jugador (no incluido en el repo) | Se pidió poder ver una foto real de Messi en vez del muñeco. Subir una foto real e identificable a un repositorio público implica riesgo de derechos de imagen, así que en vez de incluir el archivo se construyó **todo el sistema técnico**: `jugadores.js` documenta un campo opcional `foto`, `juego.js` lo carga con caché (`obtenerFotoJugador`) y lo dibuja (`dibujarAvatarConFoto`) si existe, cayendo de vuelta al muñeco vectorial (`dibujarAvatarVectorial`) si no hay archivo o todavía no cargó. El archivo en sí lo coloca cada quien de forma local/privada — nunca se sube al repo. |
+| Balón de fútbol realista (no una esfera plana) | El balón era un círculo blanco con un punto negro: se veía plano. Se rediseñó `dibujarBalon()` para que parezca un balón real: base con **gradiente radial** (sombreado 3D, luz fija arriba-izquierda), **paneles de pentágonos** estilo "Telstar" con costuras, **brillo especular** y contorno, todo recortado al círculo (`clip`). El balón ahora **gira** (`balon.angulo`, integrado en `actualizar()` a partir de la velocidad) para que se note el movimiento. Se añadió `dibujarSombraBalon()` (sombra elíptica que se encoge con la altura → profundidad) y un gradiente al césped. Todo se dibuja por código, sin imágenes. |
 
 ---
 
@@ -177,6 +178,9 @@ quedan las constantes que no dependen del nivel:
       automático al muñeco vectorial). Verificado con pruebas deterministas:
       sin `foto` definida, con una ruta que no existe, y con una imagen ya
       cargada — las tres ramas dibujan sin lanzar errores en consola.
+- [x] Balón de fútbol realista: paneles de pentágonos, sombreado 3D, brillo,
+      giro según la velocidad y sombra en el suelo. Césped con gradiente.
+      Verificado en navegador (captura ampliada del balón) sin errores.
 - [ ] Mapa del mundo (fase 2).
 
 ---

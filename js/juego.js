@@ -108,6 +108,9 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
       y: RADIO_BALON + 10,
       vx: (Math.random() - 0.5) * 3,
       vy: 0,
+      // Ángulo de giro (en radianes). Hace que los paneles del balón roten
+      // según hacia dónde se mueve, como un balón real que rueda en el aire.
+      angulo: Math.random() * Math.PI * 2,
     };
   }
 
@@ -253,6 +256,9 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     balon.vy += gravedad;
     balon.x += balon.vx;
     balon.y += balon.vy;
+    // El giro depende de la velocidad horizontal (rueda hacia donde va) y un
+    // poco de la vertical, para que se note que el balón gira al subir y caer.
+    balon.angulo += balon.vx * 0.05 + balon.vy * 0.004;
 
     if (balon.x - RADIO_BALON < 0 || balon.x + RADIO_BALON > lienzo.width) {
       balon.vx *= -1;
@@ -310,14 +316,25 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
   function dibujarCesped() {
     const inicio = obtenerSuelo();
     const alto = lienzo.height - inicio;
-    contexto.fillStyle = "#2e8b57";
+    // Gradiente: el césped es más claro al fondo (cerca del horizonte) y más
+    // oscuro al frente, lo que da profundidad en vez de un verde plano.
+    const verde = contexto.createLinearGradient(0, inicio, 0, lienzo.height);
+    verde.addColorStop(0, "#3aa76a");
+    verde.addColorStop(1, "#1f6b3f");
+    contexto.fillStyle = verde;
     contexto.fillRect(0, inicio, lienzo.width, alto);
+
+    // Franjas verticales alternas (el típico corte del césped de estadio).
     contexto.fillStyle = "rgba(255, 255, 255, 0.06)";
     const numFranjas = 6;
     const ancho = lienzo.width / numFranjas;
     for (let i = 0; i < numFranjas; i += 2) {
       contexto.fillRect(i * ancho, inicio, ancho, alto);
     }
+
+    // Línea de sombra justo en el borde del césped, para separar suelo y campo.
+    contexto.fillStyle = "rgba(0, 0, 0, 0.12)";
+    contexto.fillRect(0, inicio, lienzo.width, 3);
   }
 
   /** Contador grande centrado; su tamaño se adapta a la altura del canvas. */
@@ -334,19 +351,139 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     contexto.restore();
   }
 
-  function dibujarBalon() {
+  /**
+   * Sombra elíptica del balón en el césped. Se encoge y se aclara cuanto más
+   * alto está el balón, lo que da una fuerte sensación de profundidad (se
+   * "lee" a qué altura va sin mirar el balón).
+   */
+  function dibujarSombraBalon() {
+    const suelo = obtenerSuelo();
+    const distanciaAlSuelo = suelo - (balon.y + RADIO_BALON);
+    // factor 1 = pegado al suelo (sombra grande y oscura); ~0.2 = bien arriba.
+    const factor = limitar(1 - distanciaAlSuelo / (lienzo.height * 0.55), 0.2, 1);
     contexto.save();
     contexto.beginPath();
-    contexto.arc(balon.x, balon.y, RADIO_BALON, 0, Math.PI * 2);
-    contexto.fillStyle = "#ffffff";
+    contexto.ellipse(
+      balon.x,
+      suelo + 8,
+      RADIO_BALON * factor,
+      RADIO_BALON * 0.32 * factor,
+      0,
+      0,
+      Math.PI * 2
+    );
+    contexto.fillStyle = `rgba(0, 0, 0, ${0.22 * factor})`;
     contexto.fill();
-    contexto.lineWidth = 2;
-    contexto.strokeStyle = "#222";
-    contexto.stroke();
+    contexto.restore();
+  }
+
+  /** Traza (sin pintar) un pentágono centrado en (cx, cy). */
+  function trazarPentagono(cx, cy, radio, rotacion) {
     contexto.beginPath();
-    contexto.arc(balon.x, balon.y, RADIO_BALON * 0.4, 0, Math.PI * 2);
-    contexto.fillStyle = "#222";
+    for (let i = 0; i < 5; i++) {
+      const a = rotacion + i * ((Math.PI * 2) / 5) - Math.PI / 2;
+      const px = cx + Math.cos(a) * radio;
+      const py = cy + Math.sin(a) * radio;
+      if (i === 0) contexto.moveTo(px, py);
+      else contexto.lineTo(px, py);
+    }
+    contexto.closePath();
+  }
+
+  /**
+   * Paneles negros del balón (estilo clásico "Telstar"): un pentágono central
+   * y cinco alrededor, más las costuras que los unen. Se dibuja ya rotado por
+   * el ángulo del balón, así que parece girar de verdad.
+   */
+  function dibujarPanelesBalon(r) {
+    contexto.fillStyle = "#1c1c1c";
+
+    const radioCentral = r * 0.4;
+    trazarPentagono(0, 0, radioCentral, 0);
     contexto.fill();
+
+    const radioExterno = r * 0.32;
+    const distancia = r * 0.95;
+    for (let i = 0; i < 5; i++) {
+      const a = i * ((Math.PI * 2) / 5) - Math.PI / 2 + Math.PI / 5;
+      const cx = Math.cos(a) * distancia;
+      const cy = Math.sin(a) * distancia;
+      trazarPentagono(cx, cy, radioExterno, a + Math.PI);
+      contexto.fill();
+    }
+
+    // Costuras: líneas desde los vértices del pentágono central hacia el borde.
+    contexto.strokeStyle = "rgba(30, 30, 30, 0.5)";
+    contexto.lineWidth = Math.max(1, r * 0.06);
+    contexto.lineCap = "round";
+    for (let i = 0; i < 5; i++) {
+      const a = i * ((Math.PI * 2) / 5) - Math.PI / 2;
+      contexto.beginPath();
+      contexto.moveTo(Math.cos(a) * radioCentral, Math.sin(a) * radioCentral);
+      contexto.lineTo(Math.cos(a) * r * 0.98, Math.sin(a) * r * 0.98);
+      contexto.stroke();
+    }
+  }
+
+  /**
+   * Dibuja un balón de fútbol realista: base con sombreado 3D (la luz viene de
+   * arriba-izquierda), paneles que GIRAN con el balón, y un brillo especular
+   * fijo (la luz no gira). Todo recortado al círculo para que nada se salga.
+   */
+  function dibujarBalon() {
+    const r = RADIO_BALON;
+    contexto.save();
+    contexto.translate(balon.x, balon.y);
+
+    // Recorte circular: todo lo de abajo se queda dentro del balón.
+    contexto.beginPath();
+    contexto.arc(0, 0, r, 0, Math.PI * 2);
+    contexto.clip();
+
+    // Base blanca con sombreado para que se vea esférico, no plano.
+    const base = contexto.createRadialGradient(
+      -r * 0.35,
+      -r * 0.4,
+      r * 0.15,
+      0,
+      0,
+      r * 1.2
+    );
+    base.addColorStop(0, "#ffffff");
+    base.addColorStop(0.7, "#ededed");
+    base.addColorStop(1, "#b4b4b4");
+    contexto.fillStyle = base;
+    contexto.fillRect(-r, -r, r * 2, r * 2);
+
+    // Paneles que giran con el balón.
+    contexto.save();
+    contexto.rotate(balon.angulo);
+    dibujarPanelesBalon(r);
+    contexto.restore();
+
+    // Brillo especular (la fuente de luz es fija arriba-izquierda, NO gira).
+    const brillo = contexto.createRadialGradient(
+      -r * 0.4,
+      -r * 0.45,
+      0,
+      -r * 0.4,
+      -r * 0.45,
+      r * 0.95
+    );
+    brillo.addColorStop(0, "rgba(255, 255, 255, 0.85)");
+    brillo.addColorStop(0.45, "rgba(255, 255, 255, 0)");
+    contexto.fillStyle = brillo;
+    contexto.fillRect(-r, -r, r * 2, r * 2);
+
+    contexto.restore();
+
+    // Contorno (fuera del clip para que se vea nítido y completo).
+    contexto.save();
+    contexto.beginPath();
+    contexto.arc(balon.x, balon.y, r, 0, Math.PI * 2);
+    contexto.lineWidth = 1.5;
+    contexto.strokeStyle = "rgba(0, 0, 0, 0.4)";
+    contexto.stroke();
     contexto.restore();
   }
 
@@ -452,6 +589,7 @@ function crearPartida(lienzo, jugador, dificultad, opciones = {}) {
     dibujarGradas();
     dibujarCesped();
     dibujarContador();
+    dibujarSombraBalon();
     dibujarBalon();
     dibujarAvatar();
     if (!viva) dibujarFueraDeJuego();

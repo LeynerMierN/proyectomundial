@@ -181,6 +181,11 @@ está en [`css/README.md`](css/README.md). En resumen:
   sección siguiente.
 - **`<canvas>` para el juego**: permite una animación fluida del balón con
   `requestAnimationFrame` y física simple (gravedad + impulso + rebotes).
+- **Balón de fútbol dibujado por código** (no una imagen): `dibujarBalon()` usa
+  un gradiente radial para el sombreado 3D, paneles de pentágonos estilo
+  "Telstar" con costuras, un brillo especular y un contorno, todo recortado al
+  círculo. El balón **gira** según su velocidad y proyecta una **sombra** en el
+  césped que se encoge con la altura, dando sensación de profundidad.
 - **Sonidos con Web Audio API**: se sintetizan tonos por código en vez de cargar
   archivos `.mp3`/`.wav`. Cero dependencias y funciona offline.
 - **Dificultad como datos**: los 3 niveles viven en `data/dificultades.js`, así

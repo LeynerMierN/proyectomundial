@@ -1,0 +1,11 @@
+# Archivos basura del sistema operativo (no son parte del proyecto)
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Configuración de editores
+.vscode/
+.idea/
+
+# Logs
+*.log

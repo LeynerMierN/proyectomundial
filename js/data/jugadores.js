@@ -21,15 +21,14 @@
  *   foto        -> OPCIONAL. Ruta a una imagen real (PNG/JPG) para usar en
  *                  vez del muñeco dibujado por código, tanto en la tarjeta de
  *                  selección como en el juego (ver avatares.js y juego.js).
- *                  Si el archivo no existe, el jugador sigue mostrando el
- *                  muñeco vectorial sin ningún error.
+ *                  Si NO se define, por defecto se usa `assets/<id>.png`
+ *                  (la convención del proyecto: cada jugador tiene su PNG con
+ *                  ese nombre). Si el archivo no existe, el jugador sigue
+ *                  mostrando el muñeco vectorial sin ningún error.
  *
- *                  ⚠️ No se incluyen fotos reales de futbolistas en este
- *                  repositorio por derechos de imagen (son personas reales
- *                  identificables). Si agregas una, hazlo bajo tu propia
- *                  responsabilidad y solo para uso académico/privado: coloca
- *                  el archivo en `assets/jugadores/<id>.png` y descomenta la
- *                  línea `foto` correspondiente.
+ *                  ⚠️ Las fotos son solo para uso académico/privado: son
+ *                  personas reales identificables, así que su uso queda a
+ *                  responsabilidad de quien las agrega.
  *
  * Se expone como una constante global `JUGADORES` para que los módulos
  * cargados después (sin imports/módulos ES) puedan leerla.
@@ -46,7 +45,6 @@ const JUGADORES = [
     colorPiel: "#E8B98A",
     control: 10,
     frase: "La Pulga nunca deja caer el balón.",
-    // foto: "assets/jugadores/messi.png", // descomenta al agregar el archivo
   },
   {
     id: "cristiano",

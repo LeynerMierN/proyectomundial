@@ -35,23 +35,26 @@ const ESCALA_AVATAR = 1.35;
 // Caché de fotos reales por id de jugador (ver `foto` en data/jugadores.js).
 // Es a nivel de módulo (no dentro de crearPartida) para que la imagen se
 // cargue UNA sola vez aunque el jugador juegue varias partidas seguidas.
-// Si un jugador no tiene `foto` definida, simplemente nunca aparece aquí y
-// se sigue usando el dibujo vectorial de respaldo (ver dibujarAvatar).
+// Cada imagen se carga una sola vez aunque el jugador juegue varias partidas.
 const cacheFotosJugadores = {};
 
 /**
  * Devuelve el <img> de la foto de un jugador, cargándola la primera vez que
- * se pide. Mientras la imagen no haya terminado de cargar (es asíncrono),
- * dibujarAvatar() sigue usando el muñeco vectorial sin que se note ningún
- * error ni un parpadeo en blanco.
+ * se pide. La ruta es la del campo `foto` si existe, o por defecto
+ * `assets/<id>.png` — la MISMA convención que usan las cartas de selección
+ * (ver avatares.js). Así todos los jugadores muestran su foto real también
+ * dentro del juego, sin tener que listarla uno por uno.
+ *
+ * Mientras la imagen no haya terminado de cargar (es asíncrono), o si el
+ * archivo no existe, dibujarAvatar() sigue usando el muñeco vectorial de
+ * respaldo sin que se note ningún error ni un parpadeo en blanco.
  * @param {Object} jugador
- * @returns {HTMLImageElement|null} null si el jugador no tiene foto definida.
+ * @returns {HTMLImageElement} la imagen (puede no estar lista aún).
  */
 function obtenerFotoJugador(jugador) {
-  if (!jugador.foto) return null;
   if (!cacheFotosJugadores[jugador.id]) {
     const imagen = new Image();
-    imagen.src = jugador.foto;
+    imagen.src = jugador.foto || `assets/${jugador.id}.png`;
     cacheFotosJugadores[jugador.id] = imagen;
   }
   return cacheFotosJugadores[jugador.id];
